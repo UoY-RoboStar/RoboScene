@@ -1,0 +1,345 @@
+include "RoboChartCSP/SAR_SW.csp"
+include "RoboChartCSP/SAR_Handheld.csp"
+include "RoboChartCSP/core_defs.csp"
+include "RoboChartCSP/instantiations.csp"
+include "RoboChartCSP/file_drone_defs.csp"
+include "RoboChartCSP/file_handheld_defs.csp"
+include "RoboChartCSP/robochart_defs.csp"
+include "RoboChartCSP/core_timed_defs.csp"
+include "RoboChartCSP/state_timed_defs.csp"
+
+
+channel terminate
+
+channel IsBatteryOk: Bool
+
+channel GetDroneBatteryStatus
+
+channel GetBatteryStatus
+
+channel DisplayStatus:Status
+
+channel DisplayDroneBatteryStatus:Status
+
+channel TurnOff
+
+channel DroneOff
+
+
+
+channel setStatus: Status
+
+channel getStatus: Status 
+
+channel setStatusOk: Bool
+
+channel getStatusOk: Bool
+
+
+channel setCount: IDS.rh_core_int.rh_core_int
+
+channel getCount: IDS.rh_core_int.rh_core_int
+
+const_min = 3
+const_max = 5
+
+const_deadline = 6
+
+-- declaring identifiers of fragments
+
+datatype IDS = 
+
+              ID_ALT  | 
+
+              ID_LOOP | 
+
+              ID_PAR | 
+
+              ID_STR
+
+
+
+channel guard: IDS.rh_core_int.rh_core_int.Bool
+
+channel alt: IDS.rh_core_int
+
+channel loop: IDS.rh_core_int
+
+channel par: IDS.rh_core_int
+
+channel str: IDS.rh_core_int
+
+
+
+nametype rh_core_int = {0..10}
+
+
+
+
+
+Timed(OneStep) { 
+
+-- Ideal Human-Interaction BatteryCheck
+
+	BatteryCheck = timed_priority((((
+				(Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) 
+					[| diff(inter(union(A_Pilot,A_Handheld),A_Drone),gets) |] 
+				Drone) 
+				[| {|terminate,par,str|} |] 
+			Control) 
+			[| {|loop,alt,guard,terminate|} |] 
+		guards) 
+		[| union(sharedVars, {|terminate|}) |] 
+		varMemory) 
+		\{|loop,alt,par,str,guard|}
+
+	
+
+	
+
+	-- Lifelines
+
+	
+
+	Pilot = Deadline(deadline_Pilot_0, const_deadline)
+	
+	deadline_Pilot_0 = GetDroneBatteryStatus -> DisplayDroneBatteryStatus?status -> setStatus!status-> (|~| x:{const_min..const_max}@wait(x)); IsBatteryOk?statusOk -> setStatusOk!statusOk-> terminate -> SKIP
+
+	
+
+	Handheld = GetDroneBatteryStatus -> GetBatteryStatus -> DisplayStatus?status -> DisplayDroneBatteryStatus?status -> terminate -> SKIP
+
+
+	Drone = GetBatteryStatus -> DisplayStatus?status -> terminate -> SKIP
+
+	
+
+	Control = Strict [| {| terminate |} |] Parallel
+
+	
+
+	-- Par constructs
+
+	
+
+	Parallel = terminate -> SKIP
+
+	
+
+	-- Strict constructs
+
+	
+
+	Strict = terminate -> SKIP
+
+
+
+	-- Alt constructs
+	
+
+	-- Loop constructs
+
+
+	-- Handling of guards for loop and alt constructs
+
+			
+
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+
+	
+
+	evaluation = reset_counters; guards_response
+	
+
+	counters = terminate -> SKIP
+	
+
+	reset_counters = SKIP
+
+	
+
+	
+
+	guards_response = terminate -> SKIP
+
+		
+
+			
+
+	
+
+	varMemory = Memory_status(Status_High) [|{|terminate|}|] Memory_statusok(false)
+
+					 
+
+
+
+	Memory_status(status) =
+
+				getStatus!status -> Memory_status(status)
+
+				[]
+
+				setStatus?x__ -> Memory_status(x__)
+
+				[]
+
+				terminate -> SKIP
+				
+	
+					 
+
+
+
+	Memory_statusok(statusok) =
+
+				getStatusOk!statusok -> Memory_statusok(statusok)
+
+				[]
+
+				setStatusOk?x__ -> Memory_statusok(x__)
+
+				[]
+
+				terminate -> SKIP
+
+
+	A_Pilot = union(union({|GetDroneBatteryStatus,DisplayDroneBatteryStatus,IsBatteryOk,terminate,TurnOff|},statusokVars),statusVars)
+
+	A_Handheld = {|TurnOff,DroneOff,GetBatteryStatus,DisplayStatus,GetDroneBatteryStatus,DisplayDroneBatteryStatus,terminate|}
+
+	A_Drone = {|terminate,GetBatteryStatus,DisplayStatus,DroneOff|}
+
+}
+
+
+
+A_Counters = countVars
+
+countVars = {|getCount,setCount|}
+
+
+sharedVars = union(statusVars,statusokVars)
+
+statusVars = {|setStatus,getStatus|}
+statusokVars = {|setStatusOk,getStatusOk|}
+
+gets = {|getStatus,getStatusOk|}
+
+TRUN(S)=RUN(union(S, {tock}))
+seconds(t)=t
+s(t) = seconds(t)
+
+
+
+
+
+
+
+Timed(OneStep) {
+	ADeadline(S,E,d) = EndBy(TRUN(S),d) [|E|> SKIP
+	
+	ALL = {|GetDroneBatteryStatus,
+		DisplayDroneBatteryStatus.Status_Low,
+		DisplayDroneBatteryStatus.Status_High,
+		DisplayStatus.Status_Low,
+		DisplayStatus.Status_High,
+		GetBatteryStatus,
+		IsBatteryOk.true,
+		IsBatteryOk.false,
+		terminate,
+		SAR_Handheld::DisplayStatus.in.Status_High,
+		SAR_Handheld::DisplayStatus.in.Status_Low,
+		SAR_Handheld::GetDroneBatteryStatus.in,
+		SAR_Handheld::DisplayDroneBatteryStatusCall.Status_High,
+		SAR_Handheld::DisplayDroneBatteryStatusCall.Status_Low,
+		SAR_Handheld::GetBatteryStatusCall,
+		SAR_SW::DisplayStatusCall.Status_High,
+		SAR_SW::DisplayStatusCall.Status_Low,
+		SAR_SW::GetBatteryStatus.in,
+		setStatus.Status_High,
+		setStatus.Status_Low,
+		getStatus.Status_High,
+		getStatus.Status_Low,
+		getStatusOk.true,
+		getStatusOk.false,
+		setStatusOk.true,
+		setStatusOk.false
+	|}
+	
+	
+	Interface = SAR_Handheld::O__(0,1)[[
+			SAR_Handheld::GetBatteryStatusCall <- GetBatteryStatus,
+			SAR_Handheld::DisplayStatus.in.z <- DisplayStatus.z,
+			SAR_Handheld::GetDroneBatteryStatus.in <- GetDroneBatteryStatus,
+			SAR_Handheld::DisplayDroneBatteryStatusCall.y <- DisplayDroneBatteryStatus.y, 
+			SAR_Handheld::terminate <- terminate |
+			y: Status, z: Status
+			]] 
+	
+	Device = SAR_SW::O__(0,1)[[
+			SAR_SW::GetBatteryStatus.in <- GetBatteryStatus, 
+			SAR_SW::DisplayStatusCall.y <- DisplayStatus.y,
+			SAR_SW::terminate <- terminate|
+			y: Status
+			]]
+	
+	SystemBatteryCheck = BatteryCheck 
+		[|{|
+			GetDroneBatteryStatus,
+			GetBatteryStatus, 
+			DisplayStatus,
+			DisplayDroneBatteryStatus,
+			terminate
+		|}|] 
+		((Interface; terminate -> SKIP)
+		[|{|
+			GetBatteryStatus,
+			DisplayStatus,
+			terminate
+		|}|]
+		(Device; terminate -> SKIP))
+		
+
+	Property5Fail = timed_priority(GetDroneBatteryStatus->ADeadline(ALL,{|setStatusOk|},s(5)) ; terminate -> SKIP)  
+	
+	Property6Pass = timed_priority(GetDroneBatteryStatus->ADeadline(ALL,{|setStatusOk|},s(6)) ; terminate -> SKIP)
+	
+	Property3Pass = timed_priority(GetDroneBatteryStatus->ADeadline(ALL,{|setStatusOk|},s(3)) ; terminate -> SKIP)
+}
+
+
+
+
+Timed(OneStep) {
+	System = timed_priority(SystemBatteryCheck)
+
+
+	assert not BatteryCheck :[deadlock free]
+
+	assert BatteryCheck :[divergence free]
+
+	assert not BatteryCheck :[deterministic]
+
+
+
+	assert not SystemBatteryCheck :[deadlock free]
+
+	assert SystemBatteryCheck :[divergence free]
+
+	assert not SystemBatteryCheck :[deterministic]
+
+	assert System :[has trace [T]]: <GetDroneBatteryStatus,GetBatteryStatus,tock,DisplayStatus.Status_High,DisplayDroneBatteryStatus.Status_High,setStatus.Status_High,tock,tock,tock,IsBatteryOk.true,setStatusOk.true,terminate>
+	
+	assert not System :[has trace [T]]: <GetDroneBatteryStatus,GetBatteryStatus,tock,DisplayStatus.Status_High,DisplayDroneBatteryStatus.Status_High,setStatus.Status_High,tock,tock,IsBatteryOk.true,setStatusOk.true,terminate>
+
+
+	assert Property5Fail [T= System
+			-- expecting failure as 5 is the max time required within the RoboScene model, but there's time passing in the RoboChart models
+	assert Property6Pass [T= System
+			-- expecting a pass as 5 is the max time required within the RoboScene model, plus a passing of 1 tock in the RoboChart models, so a max of 6
+	
+	assert not Property3Pass [T= System
+			-- expecting a pass as 3 is the min time required within the RoboScene model, and there's time passing in the RoboChart models
+
+}

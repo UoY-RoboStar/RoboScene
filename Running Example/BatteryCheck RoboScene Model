@@ -1,0 +1,40 @@
+Capabilities
+	lifeline Pilot
+		var status: Status
+		var statusOk: boolean
+		in IsBatteryOk <- Pilot
+		in DisplayDroneBatteryStatus: Status <- Handheld
+		out GetDroneBatteryStatus -> Handheld
+
+	lifeline Handheld
+		out GetBatteryStatus -> Drone
+
+	lifeline Drone
+		out DisplayStatus: Status -> Handheld 
+	
+	Constants
+		const min: int = 3
+		const max: int = 5
+		const deadline: int = 6
+		
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Drone
+	
+	Sequence BatteryCheck
+		Actors Pilot, Handheld, Drone
+		Vars status, statusOk
+		
+		deadline(deadline)
+			Pilot->Handheld: GetDroneBatteryStatus
+			Handheld->Drone: GetBatteryStatus
+			Drone->Handheld: DisplayStatus!status
+			Handheld->Pilot: DisplayDroneBatteryStatus!status  
+			wait(min,max) on Pilot
+			Pilot->Pilot: IsBatteryOK?statusOk
+		end
+
+
+

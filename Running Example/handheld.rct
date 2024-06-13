@@ -1,0 +1,87 @@
+diagram handheld
+
+interface BatteryInput {
+	event GetDroneBatteryStatus
+}
+
+interface PilotDisplayOutput {
+	DisplayDroneBatteryStatus (status: Status)
+}
+
+interface DroneInput{
+	GetBatteryStatus()
+}
+
+interface DroneOutput {
+	event DisplayStatus: Status
+}
+
+
+robotic platform Handheld_Platform {
+	provides PilotDisplayOutput 
+	uses DroneOutput
+	uses BatteryInput
+	provides DroneInput
+}
+
+controller BatteryController {
+	uses BatteryInput
+	requires PilotDisplayOutput 
+	requires DroneInput
+	uses DroneOutput
+	
+	sref stm_ref0 = BatteryStatusStm
+	
+	connection BatteryController on GetDroneBatteryStatus to stm_ref0 on GetDroneBatteryStatus
+	connection BatteryController on DisplayStatus to stm_ref0 on DisplayStatus
+}
+
+
+stm BatteryStatusStm{
+	uses BatteryInput
+	requires PilotDisplayOutput 
+	requires DroneInput
+	uses DroneOutput
+	
+	const batteryCallWaitTime : nat
+	var astatus: Status
+
+	initial i0
+	final f0
+	
+	state WaitForInput {
+	}
+	
+	transition t14 {
+		from i0
+		to WaitForInput
+	}
+	
+	transition t9 {
+		from WaitForInput
+		to WaitForBatteryStatus
+		trigger GetDroneBatteryStatus
+		action GetBatteryStatus()
+	}
+	
+	
+	transition t1 {
+		from WaitForBatteryStatus
+		to f0
+		trigger DisplayStatus?astatus
+		action DisplayDroneBatteryStatus(astatus)
+	}
+	
+	state WaitForBatteryStatus {
+		
+	}
+}
+
+module SAR_Handheld {
+	rref rp_ref0 = Handheld_Platform
+	cref ctrl_ref3 = BatteryController
+	
+	connection rp_ref0 on GetDroneBatteryStatus to ctrl_ref3 on GetDroneBatteryStatus ( _async )
+	connection rp_ref0 on DisplayStatus to ctrl_ref3 on DisplayStatus ( _async )
+}
+

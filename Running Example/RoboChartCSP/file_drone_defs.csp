@@ -1,0 +1,18 @@
+
+--
+-- RoboChart generator version 3.0.0.202209090727
+-- Automatically generated on 08-06-2024 18:40:43
+--
+-- Iterated compression status: true
+-- Assertions compression status: false
+--
+
+-- data definitions used by platform:/resource/SAR%20-%20RunningExample/drone.rct
+datatype Status = Status_High | Status_Low
+Status_is(Status_High,Status_High) = true
+Status_is(_,Status_High) = false
+Status_is(Status_Low,Status_Low) = true
+Status_is(_,Status_Low) = false
+
+
+	

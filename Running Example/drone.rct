@@ -1,0 +1,50 @@
+interface SAR_Input {
+	event GetBatteryStatus
+}
+
+interface SAR_Output {
+	DisplayStatus (status:Status)
+}
+
+robotic platform SAR_Platform {
+	uses SAR_Input 
+	provides SAR_Output 
+}
+
+enumeration Status { High Low } 
+
+
+controller SAR_Controller {
+	uses SAR_Input requires SAR_Output sref stm_ref0 = SAR_Stm
+	connection SAR_Controller on GetBatteryStatus to stm_ref0 on GetBatteryStatus
+}
+
+stm SAR_Stm {
+	uses SAR_Input requires SAR_Output
+	
+	const operationTime: nat
+	
+	initial i0
+	final f0
+	state WaitForUserInput {
+	}
+
+	transition t2 {
+		from WaitForUserInput
+		to f0
+		trigger GetBatteryStatus
+		action wait ( operationTime ); DisplayStatus (Status::High)
+	}
+	transition t3 {
+		from i0
+		to WaitForUserInput
+	}
+}
+
+
+module SAR_SW {
+	connection rp_ref0 on GetBatteryStatus to ctrl_ref3 on GetBatteryStatus ( _async )
+	rref rp_ref0 = SAR_Platform
+	cref ctrl_ref3 = SAR_Controller
+}
+
