@@ -1,0 +1,9 @@
+cff-version: 1.0.0
+message: "If you use these materials, please cite them as below."
+authors:
+  - family-names: Hendry
+    given-names: Holly
+    orcid: https://orcid.org/0000-0002-7241-5905
+title: "RoboScene Materials"
+version: 1.0.0
+date-released: 2024-06-17
