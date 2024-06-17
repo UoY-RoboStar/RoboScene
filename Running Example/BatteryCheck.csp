@@ -112,7 +112,11 @@ Timed(OneStep) {
 
 	Drone = GetBatteryStatus -> DisplayStatus?status -> terminate -> SKIP
 
-	
+
+
+
+	-- Control process
+
 
 	Control = Strict [| {| terminate |} |] Parallel
 
