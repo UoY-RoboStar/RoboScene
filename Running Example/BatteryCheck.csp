@@ -101,9 +101,9 @@ Timed(OneStep) {
 
 	
 
-	Pilot = Deadline(deadline_Pilot_0, const_deadline)
+	Pilot = Deadline(deadline_Pilot_0, const_deadline); terminate -> SKIP
 	
-	deadline_Pilot_0 = GetDroneBatteryStatus -> DisplayDroneBatteryStatus?status -> setStatus!status-> (|~| x:{const_min..const_max}@wait(x)); IsBatteryOk?statusOk -> setStatusOk!statusOk-> terminate -> SKIP
+	deadline_Pilot_0 = GetDroneBatteryStatus -> DisplayDroneBatteryStatus?status -> setStatus!status-> (|~| x:{const_min..const_max}@wait(x)); IsBatteryOk?statusOk -> setStatusOk!statusOk-> SKIP
 
 	
 
@@ -292,13 +292,13 @@ Timed(OneStep) {
 			DisplayDroneBatteryStatus,
 			terminate
 		|}|] 
-		((Interface; terminate -> SKIP)
+		(((Interface; SKIP)
 		[|{|
 			GetBatteryStatus,
 			DisplayStatus,
 			terminate
 		|}|]
-		(Device; terminate -> SKIP))
+		(Device; SKIP)); terminate -> SKIP)
 		
 
 	Property5Fail = timed_priority(GetDroneBatteryStatus->ADeadline(ALL,{|setStatusOk|},s(5)) ; terminate -> SKIP)  
