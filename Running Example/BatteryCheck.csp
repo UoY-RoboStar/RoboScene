@@ -43,7 +43,7 @@ channel getCount: IDS.rh_core_int.rh_core_int
 const_min = 3
 const_max = 5
 
-const_deadline = 6
+const_decisionComplete = 6
 
 -- declaring identifiers of fragments
 
@@ -82,8 +82,8 @@ Timed(OneStep) {
 -- Ideal Human-Interaction BatteryCheck
 
 	BatteryCheck = timed_priority((((
-				(Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) 
-					[| diff(inter(union(A_Pilot,A_Handheld),A_Drone),gets) |] 
+				(Pilot [| inter(A_Pilot,A_Handheld) |] Handheld) 
+					[| inter(union(A_Pilot,A_Handheld),A_Drone) |] 
 				Drone) 
 				[| {|terminate,par,str|} |] 
 			Control) 
@@ -101,7 +101,7 @@ Timed(OneStep) {
 
 	
 
-	Pilot = Deadline(deadline_Pilot_0, const_deadline); terminate -> SKIP
+	Pilot = Deadline(deadline_Pilot_0, const_decisionComplete); terminate -> SKIP
 	
 	deadline_Pilot_0 = GetDroneBatteryStatus -> DisplayDroneBatteryStatus?status -> setStatus!status-> (|~| x:{const_min..const_max}@wait(x)); IsBatteryOk?statusOk -> setStatusOk!statusOk-> SKIP
 
@@ -208,8 +208,8 @@ Timed(OneStep) {
 				terminate -> SKIP
 
 
-	A_Pilot = union(union({|GetDroneBatteryStatus,DisplayDroneBatteryStatus,IsBatteryOk,terminate,TurnOff|},statusokVars),statusVars)
-
+	A_Pilot = {|GetDroneBatteryStatus,DisplayDroneBatteryStatus,IsBatteryOk,terminate,TurnOff|}
+	
 	A_Handheld = {|TurnOff,DroneOff,GetBatteryStatus,DisplayStatus,GetDroneBatteryStatus,DisplayDroneBatteryStatus,terminate|}
 
 	A_Drone = {|terminate,GetBatteryStatus,DisplayStatus,DroneOff|}

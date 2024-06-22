@@ -15,7 +15,7 @@ Capabilities
 	Constants
 		const min: int = 3
 		const max: int = 5
-		const deadline: int = 6
+		const decisionComplete: int = 6
 		
 
 SequenceDiagramGroup 
