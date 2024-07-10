@@ -13,6 +13,23 @@ The folder of [all running example documents](https://github.com/UoY-RoboStar/Ro
 - [CSP for RoboChart models](https://github.com/UoY-RoboStar/RoboScene/tree/main/Running%20Example/RoboChartCSP)
 - [CSP for RoboScene model](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/BatteryCheck.csp)
 
+## SAR Example
+The folder of [all SAR example documents](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example) contains:
+- The [HTA](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/UAV%20Pilot%20SAR%20HTA.xlsx) of the example
+- Image of the final RoboChart model for the Drone
+- Image of the final RoboChart model for the Handheld
+- RoboScene sequence diagrams for the AreaSearch scenario with trained users and traits of:
+  - [Ideal Operator and Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_SD.jpg)
+  - [A Fatigued Operator and Ideal Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_-_Fatigued_SD.jpg)
+  - [An Operator Under Pressure and an Ideal Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_-_Under_Pressure_SD.jpg)
+- The RoboScene model, csp files, sequence diagrams and RoboChart models for each step of the development process:
+  - [Step 1](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%201)
+  - [Step 2](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%202)
+  - [Step 3](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%203)
+  - [Step 4](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%204)
+  - [Step 5](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%205)
+
+
 ## Metamodel
 The folder of [Metamodel documents](https://github.com/UoY-RoboStar/RoboScene/tree/main/Metamodel) contains:
 - [The total metamodel](https://github.com/UoY-RoboStar/RoboScene/blob/main/Metamodel/Total%20Metamodel%20Diagram.jpg) 
