@@ -1,0 +1,208 @@
+-- generate const_MovementStm_corner1
+const_MovementStm_corner1 = (0,0,0,0)
+
+-- generate const_MovementStm_corner2
+const_MovementStm_corner2 = (0,0,0,0)
+
+-- generate const_SystemController_stm_ref0_dronePowerTime
+const_SystemController_stm_ref0_dronePowerTime = 0
+
+-- OPERATION CONSTANTS
+
+-- BASIC TYPES
+
+-- generate const_showVideo_pictureTime
+const_showVideo_pictureTime = 0
+
+-- generate const_SystemSW_startTime
+const_SystemSW_startTime = 0
+
+-- generate const_MovementStm_areaPoints
+const_MovementStm_areaPoints = ((0,0,0,0),(0,0,0,0),(0,0,0,0),(0,0,0,0))
+
+-- generate const_SystemController_stm_ref1_startTime
+const_SystemController_stm_ref1_startTime = 0
+
+-- generate const_MovementController_stm_ref0_corner4
+const_MovementController_stm_ref0_corner4 = (0,0,0,0)
+
+-- generate const_BatteryController_stm_ref0_batteryCallWaitTime
+const_BatteryController_stm_ref0_batteryCallWaitTime = 0
+
+-- generate const_OperatorDisplayStm_hToDCommTime
+const_OperatorDisplayStm_hToDCommTime = 0
+
+-- generate const_OperatorDisplayController_stm_ref0_hToDCommTime
+const_OperatorDisplayController_stm_ref0_hToDCommTime = 0
+
+-- generate const_PowerStm_startTime
+const_PowerStm_startTime = 0
+
+-- generate Plus
+Plus(e1,e2,T) = if member(e1+e2,T) then e1+e2 else e1
+
+-- generate const_MovementController_stm_ref0_corner3
+const_MovementController_stm_ref0_corner3 = (0,0,0,0)
+
+-- generate const_MovementController_stm_ref0_corner2
+const_MovementController_stm_ref0_corner2 = (0,0,0,0)
+
+-- generate const_MovementController_stm_ref0_corner1
+const_MovementController_stm_ref0_corner1 = (0,0,0,0)
+
+-- generate --
+
+-- MODULE CONSTANTS
+
+-- CONTROLLER CONSTANTS
+
+-- STATEMACHINE CONSTANTS
+
+-- generate const_PilotDisplayStm_hToDCommTime
+const_PilotDisplayStm_hToDCommTime = 0
+
+-- generate const_BatteryController_stm_ref0_hToDCommTime
+const_BatteryController_stm_ref0_hToDCommTime = 0
+
+-- generate nat
+nametype core_nat = union({0..2},{calc_type_min(Union(
+			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))})
+
+-- generate const_BatteryStatusStm_hToDCommTime
+const_BatteryStatusStm_hToDCommTime = 0
+
+-- generate core_clock_type
+nametype core_clock_type = {0..10}
+
+-- BASIC FUNCTIONS
+
+-- generate const_showVideo_videoTime
+const_showVideo_videoTime = 0
+
+-- generate const_MovementStm_searchTime
+const_MovementStm_searchTime = 0
+
+-- generate const_BatteryStatusStm_batteryCallWaitTime
+const_BatteryStatusStm_batteryCallWaitTime = 0
+
+-- generate real
+nametype core_real = union({ -2..2},{calc_type_min(Union(
+			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))}) 
+
+-- VECTOR TYPES AND OPERATIONS
+
+
+-- CLOCKS
+
+-- generate const_PowerController_stm_ref0_dronePowerTime
+const_PowerController_stm_ref0_dronePowerTime = 0
+
+-- generate const_PilotDisplayStm_batteryCallWaitTime
+const_PilotDisplayStm_batteryCallWaitTime = 0
+
+-- generate const_PilotDisplayController_stm_ref0_batteryCallWaitTime
+const_PilotDisplayController_stm_ref0_batteryCallWaitTime = 0
+
+-- generate const_MovementController_stm_ref0_movementTime
+const_MovementController_stm_ref0_movementTime = 0
+
+-- generate const_PowerStm_dronePowerTime
+const_PowerStm_dronePowerTime = 0
+
+-- generate const_OperatorDisplayController_stm_ref1_pictureTime
+const_OperatorDisplayController_stm_ref1_pictureTime = 0
+
+-- generate const_PilotDisplayController_stm_ref2_searchTime
+const_PilotDisplayController_stm_ref2_searchTime = 0
+
+-- generate const_MovementStm_movementTime
+const_MovementStm_movementTime = 0
+
+-- generate Modulus
+Modulus(e1,e2,T) = if member(e1%e2,T) then e1%e2 else e1
+
+-- generate Minus
+Minus(e1,e2,T) = if member(e1-e2,T) then e1-e2 else e1
+
+-- generate const_PilotDisplayController_stm_ref2_movementTime
+const_PilotDisplayController_stm_ref2_movementTime = 0
+
+-- generate string
+nametype core_string = LSeq(Char,2)
+
+-- generate -- OPERATION BOUNDS
+
+-- MODULE CONSTANTS
+
+-- CONTROLLER CONSTANTS
+
+-- STATEMACHINE CONSTANTS
+
+-- generate const_MovementController_stm_ref0_searchTime
+const_MovementController_stm_ref0_searchTime = 0
+
+-- generate const_VideoController_stm_ref0_videoTime
+const_VideoController_stm_ref0_videoTime = 0
+
+-- generate const_SystemController_stm_ref1_dronePowerTime
+const_SystemController_stm_ref1_dronePowerTime = 0
+
+-- OPERATION CONSTANTS
+
+-- BASIC TYPES
+
+-- generate const_PilotDisplayController_stm_ref1_dronePowerTime
+const_PilotDisplayController_stm_ref1_dronePowerTime = 0
+
+-- generate const_PowerController_stm_ref0_startTime
+const_PowerController_stm_ref0_startTime = 0
+
+-- generate const_PilotDisplayController_stm_ref1_startTime
+const_PilotDisplayController_stm_ref1_startTime = 0
+
+-- generate const_HandheldStm_hToDCommTime
+const_HandheldStm_hToDCommTime = 0
+
+-- generate const_PilotDisplayController_stm_ref0_hToDCommTime
+const_PilotDisplayController_stm_ref0_hToDCommTime = 0
+
+-- generate const_SystemSW_dronePowerTime
+const_SystemSW_dronePowerTime = 0
+
+-- generate int
+nametype core_int = union({ -2..2},{calc_type_min(Union(
+			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))})
+
+-- generate const_MovementController_stm_ref0_areaPoints
+const_MovementController_stm_ref0_areaPoints = ((0,0,0,0),(0,0,0,0),(0,0,0,0),(0,0,0,0))
+
+-- generate Div
+Div(e1,e2,T) = if member(e1/e2,T) then e1/e2 else e1
+
+-- generate Neg
+Neg(e1,T) = if member(-e1,T) then -e1 else e1
+
+-- generate boolean
+nametype core_boolean = Bool
+
+-- generate const_HandheldController_stm_ref0_hToDCommTime
+const_HandheldController_stm_ref0_hToDCommTime = 0
+
+-- generate Mult
+Mult(e1,e2,T) = if member(e1*e2,T) then e1*e2 else e1
+
+-- generate const_VideoController_stm_ref0_pictureTime
+const_VideoController_stm_ref0_pictureTime = 0
+
+-- generate const_MovementStm_corner3
+const_MovementStm_corner3 = (0,0,0,0)
+
+-- generate const_OperatorDisplayController_stm_ref1_videoTime
+const_OperatorDisplayController_stm_ref1_videoTime = 0
+
+-- generate const_MovementStm_corner4
+const_MovementStm_corner4 = (0,0,0,0)
+
+-- generate const_SystemController_stm_ref0_startTime
+const_SystemController_stm_ref0_startTime = 0
+

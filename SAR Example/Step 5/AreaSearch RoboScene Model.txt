@@ -1,0 +1,182 @@
+Capabilities
+	lifeline Pilot
+		var flightPlan: SearchType
+		in MonitorUAVBatteryStatus <- Pilot
+		out PowerHandheld -> Handheld
+		out PowerDrone -> Handheld
+		out InputFlightPlan: SearchType -> Handheld
+		out InputHomeCoordinate: Coord -> Handheld 
+		out FollowFlightPlan -> Handheld
+		out InputAreaCoordinates: AreaCoords -> Handheld
+		out MonitorUAVStatus -> Drone
+		out GetDroneBatteryStatus -> Handheld
+		out MonitorPayload -> Handheld
+		out MonitorFlightData -> Handheld
+		out StopSearch -> Handheld
+		out ReturnToHome -> Handheld
+		out ManualControlOfUAV -> Handheld
+		out ManualMovement: Direction -> Handheld
+
+	lifeline Handheld
+		var homeCoord: Coord
+		var areaCoords: AreaCoords
+		var direction: Direction
+		out OnOffDrone -> Drone
+		out FollowPlan: SearchType -> Drone
+		out FlyToAreaCoordinates: AreaCoords -> Drone 
+		out GetBatteryStatus -> Drone
+		out DisplayDroneBatteryStatus: Status -> Pilot
+		out DroneStopSearch -> Drone
+		out FlyToCoordinate: Coord -> Drone
+		out MoveDrone: Direction -> Drone
+
+	lifeline Drone
+		out DisplayStatus: Status -> Handheld 
+
+	lifeline Operator
+		var found: boolean
+		in MissingPersonFound: boolean -> Operator
+		out InformPilotToStopSearch -> Pilot
+		
+	lifeline World
+		out ProvideFlightPlan: SearchType -> Pilot
+	
+	Time
+		const minDecisionTime: int = 1
+		const maxDecisionTime: int = 5
+		const minimumTravelTime: int = 5
+		const minimumDirectionTravelTime: int = 5
+		const communicationTime: int = 5
+		const loop_min_count: int = 0
+		const loop_max_count: int = 10
+		
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Operator, Drone
+	
+	Sequence AreaSearch
+		Actors Pilot, Handheld, Operator, Drone, World
+		Vars flightPlan, direction, areaCoods, homeCoord, found
+		
+		World->Pilot: ProvideFlightPlan!AreaSearch
+		Pilot->Handheld: PowerHandheld
+		Pilot->Handheld: PowerDrone
+		Handheld->Drone: OnOffDrone
+		Pilot->Handheld: InputFlightPlan!AreaSearch
+		Pilot->Handheld: InputHomeCoordinate!(0,0,0,0)
+		Pilot->Handheld: FollowFlightPlan
+		Handheld->Drone: FollowPlan!flightplan
+		loop (0,10) [found==false]
+			Pilot->Handheld: InputAreaCoordinates!((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0))
+			Handheld->Drone: FlyToAreaCoordinates!areaCoords
+			wait(minimumTravelTime) on Handheld
+			deadline(maxDecisionTime)
+			   	wait([minDecisionTime,maxDecisionTime]) on Operator
+			  	Operator->Operator: MissingPersonFound?found
+		  	end
+		   	alt found==true
+				wait(communicationTime) on Operator
+			  	Operator->Pilot: InformPilotToStopSearch
+			 	Pilot->Handheld: StopSearch
+				Handheld->Drone: DroneStopSearch
+		   	end
+		end
+		Pilot->Handheld: ReturnToHome
+		Handheld->Drone: FlyToCoordinate!homeCoord
+		wait(minimumTravelTime) on Handheld
+		Pilot->Handheld: ManualControlOfUAV
+		Pilot->Handheld: ManualMovement!Down
+		Handheld->Drone: MoveDrone!direction
+		wait(minimumDirectionTravelTime) on Handheld
+		Pilot->Handheld: PowerDrone
+		Handheld->Drone: OnOffDrone
+		Pilot->Handheld: PowerHandheld
+
+
+SequenceDiagramGroup 
+	Name: Not Ideal Human-Interaction - Trained 
+	Trait: Trained
+	Actors: Pilot, Handheld, Operator, Drone
+	
+	Sequence AreaSearch with Fatigued Operator
+		Actors Pilot, Handheld, Operator, Drone, World
+		Vars flightPlan, direction, areaCoods, homeCoord, found
+ 
+		World->Pilot: ProvideFlightPlan!AreaSearch
+		Pilot->Handheld: PowerHandheld
+		Pilot->Handheld: PowerDrone
+		Handheld->Drone: OnOffDrone
+		Pilot->Handheld: InputFlightPlan!AreaSearch
+		Pilot->Handheld: InputHomeCoordinate!(0,0,0,0)
+		Pilot->Handheld: FollowFlightPlan
+		Handheld->Drone: FollowPlan!flightplan
+		loop (0,10) [found==false]
+			Pilot->Handheld: InputAreaCoordinates!((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0))
+			Handheld->Drone: FlyToAreaCoordinates!areaCoords
+			wait(minimumTravelTime) on Handheld
+			deadline(maxDecisionTime)
+			   	wait([minDecisionTime+5,maxDecisionTime+5]) on Operator
+			  	Operator->Operator: MissingPersonFound?found
+		  	end
+		   	alt found==true
+				wait(communicationTime+5) on Operator
+			  	Operator->Pilot: InformPilotToStopSearch
+			 	Pilot->Handheld: StopSearch
+				Handheld->Drone: DroneStopSearch
+		   	end
+		end
+		Pilot->Handheld: ReturnToHome
+		Handheld->Drone: FlyToCoordinate!homeCoord
+		wait(minimumTravelTime) on Handheld
+		Pilot->Handheld: ManualControlOfUAV
+		Pilot->Handheld: ManualMovement!Down
+		Handheld->Drone: MoveDrone!direction
+		wait(minimumDirectionTravelTime) on Handheld
+		Pilot->Handheld: PowerDrone
+		Handheld->Drone: OnOffDrone
+		Pilot->Handheld: PowerHandheld
+
+		
+	Sequence AreaSearch with Operator under Pressure
+		Actors Pilot, Handheld, Operator, Drone, World
+		Vars flightPlan, direction, areaCoods, homeCoord, found
+
+		World->Pilot: ProvideFlightPlan!AreaSearch
+		Pilot->Handheld: PowerHandheld
+		Pilot->Handheld: PowerDrone
+		Handheld->Drone: OnOffDrone
+		Pilot->Handheld: InputFlightPlan!AreaSearch
+		Pilot->Handheld: InputHomeCoordinate!(0,0,0,0)
+		Pilot->Handheld: FollowFlightPlan
+		Handheld->Drone: FollowPlan!flightplan
+		loop (0,10) [found==false]
+			Pilot->Handheld: InputAreaCoordinates!((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0))
+			Handheld->Drone: FlyToAreaCoordinates!areaCoords
+			wait(minimumTravelTime) on Handheld
+			deadline(maxDecisionTime)
+			   	wait([minDecisionTime-2,maxDecisionTime-2]) on Operator
+			  	Operator->Operator: MissingPersonFound?found
+		  	end
+		   	alt found==true
+				wait(communicationTime-2) on Operator
+			  	Operator->Pilot: InformPilotToStopSearch
+			 	Pilot->Handheld: StopSearch
+				Handheld->Drone: DroneStopSearch
+		   	end
+		end
+		Pilot->Handheld: ReturnToHome
+		Handheld->Drone: FlyToCoordinate!homeCoord
+		wait(minimumTravelTime) on Handheld
+		Pilot->Handheld: ManualControlOfUAV
+		Pilot->Handheld: ManualMovement!Down
+		Handheld->Drone: MoveDrone!direction
+		wait(minimumDirectionTravelTime) on Handheld
+		Pilot->Handheld: PowerDrone
+		Handheld->Drone: OnOffDrone
+		Pilot->Handheld: PowerHandheld
+
+
+
+

@@ -1,0 +1,410 @@
+include "RoboChartCSP/SAR_SW.csp"
+include "RoboChartCSP/core_defs.csp"
+include "RoboChartCSP/instantiations.csp"
+include "RoboChartCSP/file_drone_defs.csp"
+include "RoboChartCSP/robochart_defs.csp"
+include "RoboChartCSP/core_timed_defs.csp"
+include "RoboChartCSP/state_timed_defs.csp"
+
+
+
+channel terminate
+
+channel Develop flight plan
+channel Turn on controller
+channel Turn on UAV
+channel Set Return to Home
+channel Initiate Matrix Search Programme
+channel MissingPersonFound?found
+channel Listen and communicate with payload operator
+channel Exit Matrix Search Programme
+channel Initiate Return to Home function
+channel Take Control of UAV
+channel Land UAV
+
+
+channel setfound: Bool
+
+channel getfound: Bool
+
+
+channel setCount: IDS.rh_core_int.rh_core_int
+
+channel getCount: IDS.rh_core_int.rh_core_int
+
+
+
+loop_1_min_count = 0
+
+loop_1_max_count = 10
+
+
+const_minDecisionTime = ?
+const_maxDecisionTime = ?
+
+	
+
+-- declaring identifiers of fragments
+
+datatype IDS = 
+
+              ID_ALT  | 
+
+              ID_LOOP | 
+
+              ID_PAR | 
+
+              ID_STR
+
+
+
+channel guard: IDS.rh_core_int.rh_core_int.Bool
+
+channel alt: IDS.rh_core_int
+
+channel loop: IDS.rh_core_int
+
+channel par: IDS.rh_core_int
+
+channel str: IDS.rh_core_int
+
+
+
+nametype rh_core_int = {0..10}
+
+
+
+
+
+Timed(OneStep) { 
+
+	AreaSearch = 
+		timed_priority(((((((
+							(Pilot [| inter(A_Pilot,A_Handheld) |] Handheld) 
+								[| inter(union(A_Pilot, A_Handheld),A_Operator) |] 
+							Operator) 
+							[| inter(union(union(A_Pilot,A_Handheld),A_Operator),A_Drone) |] 
+						Drone)
+						[| inter(union(union(union(A_Pilot,A_Handheld),A_Operator),A_Drone),A_World) |]
+					World)
+					[| {|terminate,par,str|} |] 
+				Control) 
+				[| {|loop,alt,guard,terminate|} |] 
+			guards) 
+			[| union(sharedVars, {|terminate|}) |] 
+		varMemory )
+		) \{|loop,alt,par,str,guard|}
+
+	
+
+	
+
+	-- Lifelines
+
+	
+
+	Pilot = Develop flight plan ->
+		Turn on controller -> 
+		Turn on UAV -> 
+		Set Return to Home -> 
+		Initiate Matrix Search Programme -> 
+		loop_Pilot_1; 
+		Exit Matrix Search Programme ->
+		Initiate Return to Home function ->
+		Take Control of UAV ->
+		Land UAV ->
+		terminate -> SKIP
+
+	Handheld = Turn on controller -> 
+		Turn on UAV -> 
+		Set Return to Home -> 
+		Initiate Matrix Search Programme ->
+		Exit Matrix Search Programme ->
+		Initiate Return to Home function ->
+		Take Control of UAV ->
+		Land UAV ->
+		terminate -> SKIP
+
+
+	Operator = loop_Operator_1; 
+		terminate -> SKIP
+
+
+	Drone = terminate -> SKIP
+
+	
+	World = Develop flight plan -> 
+		terminate -> SKIP
+	
+	
+	
+	
+	-- Control process
+
+
+	Control = Strict [| {| terminate |} |] Parallel
+
+	
+
+	-- Par constructs
+
+	
+
+	Parallel = terminate -> SKIP
+
+	
+
+	-- Strict constructs
+
+	
+
+	Strict = terminate -> SKIP
+
+
+
+	-- Alt constructs
+
+
+
+	-- Loop constructs
+
+
+
+
+
+	loop_Pilot_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+
+				(x)&(
+					Listen and communicate with payload operator  -> 
+					loop_Pilot_1
+				) 
+
+				[]
+
+				(not(x))&(SKIP)
+
+				)
+
+
+	loop_Operator_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+
+				(x)&(
+					(|~|x:{const_minDecisionTime+5..const_maxDecisionTime+5}@wait(x));
+					MissingPersonFound?found -> 
+					setfound!found -> 
+					Listen and communicate with payload operator -> 
+					loop_Operator_1
+				) 
+
+				[]
+
+				(not(x))&(SKIP)
+
+				)
+
+
+
+
+
+	-- Handling of guards for loop and alt constructs
+
+			
+
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+
+	
+
+	evaluation = reset_counters; guards_response
+	
+
+	counters = Counter_ID_1(0) 
+
+	
+
+	Counter_ID_1(count) = 
+
+				getCount.ID_LOOP.1!count -> Counter_ID_1(count)
+
+				[]
+
+				setCount.ID_LOOP.1?x__ -> Counter_ID_1(x__)
+
+				[]
+
+				terminate -> SKIP
+
+	
+
+	
+
+	reset_counters = setCount.ID_LOOP.1!0 -> SKIP
+
+	
+
+	
+
+	guards_response = alt?ID_ALT.x -> ((x==1)&(getfound?found -> (
+
+				(found == true)&(guard.ID_ALT.1.1!true -> SKIP)
+
+				[] not((found == true))&(guard.ID_ALT.1.1!false -> SKIP)))); guards_response
+
+			[] loop?ID_LOOP.id -> ((id==1)&(getfound?found -> getCount.ID_LOOP.1?x -> (
+
+				not(found==false)&(setCount.ID_LOOP.1!0 -> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+
+				[] (x<loop_1_min_count and found==false)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+
+				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+
+				[] (not(x<loop_1_min_count) and not(x>=loop_1_max_count) and found==false)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+
+				[] ((x>=loop_1_min_count and x<loop_1_max_count) and found==false)&((setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP))))); guards_response
+
+			[] terminate -> SKIP
+
+		
+
+			
+	-- Variable Memory declarations
+	
+
+	varMemory = Memory_found(false)
+
+				
+
+	Memory_found(found) =
+
+				getfound!found -> Memory_found(found)
+
+				[]
+
+				setfound?x__ -> Memory_found(x__)
+
+				[]
+
+				terminate -> SKIP
+		
+
+}
+
+
+-- Lifeline alphabets
+
+A_Pilot = 
+		{|
+			Turn on controller,Turn on UAV,Set Return to Home,Initiate Matrix Search Programme,
+			Exit Matrix Search Programme,Initiate Return to Home function,Develop flight plan,
+			Listen and communicate with payload operator,Take Control of UAV,
+			Land UAV,guard.ID_LOOP.1,loop.ID_LOOP.1,terminate
+		|}
+
+
+
+A_Handheld = 
+	{|
+		Turn on controller,Turn on UAV,Set Return to Home,Initiate Matrix Search Programme,
+		Exit Matrix Search Programme,Initiate Return to Home function,
+		Take Control of UAV,Land UAV,terminate
+	|}
+
+
+
+A_Operator = 
+	{|
+		MissingPersonFound,Listen and communicate with payload operator,
+		terminate,guard.ID_LOOP.1,loop.ID_LOOP.1
+	|}
+
+
+A_Drone = 
+	{|	
+		terminate
+	|}
+
+
+A_World = 
+	{| 
+		terminate,Develop flight plan
+	|}
+
+
+-- Loop counters
+
+A_Counters = countVars
+countVars = {|getCount,setCount|}
+
+
+
+-- Variable setters and getters
+
+sharedVars = foundVars
+
+foundVars = {|getfound,setfound|}
+
+gets = {| getfound |}
+
+
+
+
+Timed(OneStep) {
+	
+	
+	-- All events and operations expected within the system operation, excluding terminate
+	
+	ALL = union(union({|
+		Develop flight plan,
+		Turn on controller,
+		Turn on UAV,
+		Set Return to Home,
+		Initiate Matrix Search Programme,
+		MissingPersonFound?found,
+		Listen and communicate with payload operator,
+		Exit Matrix Search Programme,
+		Initiate Return to Home function,
+		Take Control of UAV,
+		Land UAV,
+		SAR_SW::GetBatteryStatus.in,
+		SAR_SW::OnOffDrone.in, 
+		SAR_SW::FlyToAreaCoordinates.in,
+		SAR_SW::FlyToCoordinate.in, 
+		SAR_SW::FollowPlan.in, 
+		SAR_SW::DroneStopSearch.in, 
+		SAR_SW::MoveDrone.in,
+		
+		SAR_SW::DisplayStatusCall,
+		SAR_SW::movementCall,
+		SAR_SW::directionMovementCall
+	|},sharedVars),{|tock|})
+	
+	
+	-- Renaming of software models
+	
+	
+	Device = SAR_SW::O__(0,1,1,1,1)
+			[[
+				SAR_SW::terminate <- terminate
+			]]
+	
+	
+	-- Models combined in parallel
+	
+	SystemModels = AreaSearch 
+			[|{|
+				Develop flight plan,
+				Turn on controller,
+				Turn on UAV,
+				Set Return to Home,
+				Initiate Matrix Search Programme,
+				MissingPersonFound?found,
+				Listen and communicate with payload operator,
+				Exit Matrix Search Programme,
+				Initiate Return to Home function,
+				Take Control of UAV,
+				Land UAV,
+				terminate
+			|}|] 
+		((Device; SKIP); terminate -> SKIP)
+
+}
+

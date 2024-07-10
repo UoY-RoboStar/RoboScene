@@ -1,0 +1,765 @@
+include "RoboChartCSP/SAR_SW.csp"
+include "RoboChartCSP/SAR_Handheld.csp"
+include "RoboChartCSP/core_defs.csp"
+include "RoboChartCSP/instantiations.csp"
+include "RoboChartCSP/file_drone_defs.csp"
+include "RoboChartCSP/file_handheld_defs.csp"
+include "RoboChartCSP/robochart_defs.csp"
+include "RoboChartCSP/core_timed_defs.csp"
+include "RoboChartCSP/state_timed_defs.csp"
+
+
+
+channel terminate
+
+channel ProvideFlightPlan: SearchType
+	
+channel InputFlightPlan: SearchType
+
+channel FollowFlightPlan
+
+channel FollowPlan: SearchType
+
+channel InputHomeCoordinate: Coord
+
+channel InputAreaCoordinates: AreaCoords
+
+channel FlyToAreaCoordinates: AreaCoords
+
+channel MissingPersonFound: Bool
+
+channel InformPilotToStopSearch
+
+channel StopSearch
+
+channel DroneStopSearch
+
+channel ReturnToHome
+
+channel FlyToCoordinate: Coord
+
+channel ManualControlOfUAV
+
+channel ManualMovement: Direction
+
+channel MoveDrone : Direction
+
+channel PowerDrone
+
+channel OnOffDrone
+
+channel PowerHandheld
+
+channel GetDroneBatteryStatus
+
+channel GetBatteryStatus
+
+channel DisplayStatus : Status
+
+channel DisplayDroneBatteryStatus : Status
+
+
+
+channel setflightPlan: SearchType
+
+channel getflightPlan: SearchType 
+
+
+channel sethomeCoord: Coord
+
+channel gethomeCoord: Coord 
+
+
+channel setareaCoords: AreaCoords
+
+channel getareaCoords: AreaCoords
+
+
+channel setfound: Bool
+
+channel getfound: Bool
+
+
+channel setdirection: Direction
+
+channel getdirection: Direction
+
+
+
+channel setCount: IDS.rh_core_int.rh_core_int
+
+channel getCount: IDS.rh_core_int.rh_core_int
+
+
+
+loop_1_min_count = 0
+
+loop_1_max_count = 10
+
+
+const_minDecisionTime = ?
+const_maxDecisionTime = ?
+	
+
+-- declaring identifiers of fragments
+
+datatype IDS = 
+
+              ID_ALT  | 
+
+              ID_LOOP | 
+
+              ID_PAR | 
+
+              ID_STR
+
+
+
+channel guard: IDS.rh_core_int.rh_core_int.Bool
+
+channel alt: IDS.rh_core_int
+
+channel loop: IDS.rh_core_int
+
+channel par: IDS.rh_core_int
+
+channel str: IDS.rh_core_int
+
+
+
+nametype rh_core_int = {0..10}
+
+
+
+
+
+Timed(OneStep) { 
+
+	AreaSearch = 
+		timed_priority(((((((
+							(Pilot [| inter(A_Pilot,A_Handheld) |] Handheld) 
+								[| inter(union(A_Pilot, A_Handheld),A_Operator) |] 
+							Operator) 
+							[| inter(union(union(A_Pilot,A_Handheld),A_Operator),A_Drone) |] 
+						Drone)
+						[| inter(union(union(union(A_Pilot,A_Handheld),A_Operator),A_Drone),A_World) |]
+					World)
+					[| {|terminate,par,str|} |] 
+				Control) 
+				[| {|loop,alt,guard,terminate|} |] 
+			guards) 
+			[| union(sharedVars, {|terminate|}) |] 
+		varMemory )
+		) \{|loop,alt,par,str,guard|}
+
+	
+
+	
+
+	-- Lifelines
+
+	
+
+	Pilot = ProvideFlightPlan?flightPlan ->
+		setflightPlan!flightPlan ->
+		PowerHandheld -> 
+		PowerDrone -> 
+		InputFlightPlan!flightPlan -> 
+		InputHomeCoordinate!(0,0,0,0) -> SKIP; 
+		FollowFlightPlan ->
+		loop_Pilot_1; 
+		ReturnToHome -> 
+		ManualControlOfUAV -> 
+		ManualMovement!Direction_Down -> 
+		PowerDrone ->
+		PowerHandheld ->
+		terminate -> SKIP
+
+	Handheld = PowerHandheld -> 
+		PowerDrone -> 
+		OnOffDrone -> 
+		InputFlightPlan?flightPlan -> 
+		InputHomeCoordinate?homeCoord -> 
+		sethomeCoord!homeCoord -> SKIP; 
+		FollowFlightPlan -> 
+		FollowPlan!SearchType_AreaSearch ->
+		loop_Handheld_1; 
+		ReturnToHome -> 
+		gethomeCoord?homeCoord -> 
+		FlyToCoordinate!homeCoord -> 
+		ManualControlOfUAV -> 
+		ManualMovement?direction -> 
+		setdirection!direction -> 
+		MoveDrone!direction -> 
+		PowerDrone ->
+		OnOffDrone -> 
+		PowerHandheld -> 
+		terminate -> SKIP
+
+
+	Operator = loop_Operator_1; 
+		terminate -> SKIP
+
+
+	Drone = OnOffDrone -> 
+		FollowPlan?flightPlan -> 
+		loop_Drone_1;
+		FlyToCoordinate?homeCoord -> 
+		MoveDrone?direction -> 
+		OnOffDrone ->
+		terminate -> SKIP
+
+	
+	World = ProvideFlightPlan!SearchType_AreaSearch -> 
+		terminate -> SKIP
+	
+	
+	
+	
+	-- Control process
+
+
+	Control = Strict [| {| terminate |} |] Parallel
+
+	
+
+	-- Par constructs
+
+	
+
+	Parallel = terminate -> SKIP
+
+	
+
+	-- Strict constructs
+
+	
+
+	Strict = terminate -> SKIP
+
+
+
+	-- Alt constructs
+
+
+
+	alt_Pilot_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> (
+
+			x&(
+				InformPilotToStopSearch -> 
+				StopSearch -> 
+				SKIP
+			)
+
+			[] not(x)&SKIP)
+
+	 
+
+	alt_Operator_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> (
+
+			x&(
+				InformPilotToStopSearch -> 
+				SKIP
+			)
+
+			[] not(x)&SKIP)
+
+	
+
+	alt_Handheld_1= alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> (
+
+			x&(
+				StopSearch -> 
+				DroneStopSearch -> 
+				SKIP
+			)
+
+			[] not(x)&SKIP)
+
+
+	alt_Drone_1= alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> (
+
+			x&(
+				DroneStopSearch -> 
+				SKIP
+			)
+
+			[] not(x)&SKIP)
+
+
+
+
+	-- Loop constructs
+
+
+
+
+
+	loop_Pilot_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+
+				(x)&(
+					InputAreaCoordinates!((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)) -> 
+					alt_Pilot_1;
+					loop_Pilot_1
+				) 
+
+				[]
+
+				(not(x))&(SKIP)
+
+				)
+	
+	
+
+	loop_Handheld_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+
+				(x)&(
+					InputAreaCoordinates?areaCoordinates -> 
+					setareaCoords!areaCoordinates -> 
+					getareaCoords?areaCoordinates -> 
+					FlyToAreaCoordinates!areaCoordinates ->
+					alt_Handheld_1;
+					loop_Handheld_1
+				) 
+
+				[]
+
+				(not(x))&(SKIP)
+
+				)
+	
+
+
+	loop_Drone_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+
+				(x)&(
+					FlyToAreaCoordinates?areaCoordinates -> 
+					alt_Drone_1;
+					loop_Drone_1
+				) 
+
+				[]
+
+				(not(x))&(SKIP)
+
+				) 
+
+
+
+	loop_Operator_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+
+				(x)&(
+					(|~|x:{const_minDecisionTime-2..const_maxDecisionTime-2}@wait(x));
+					MissingPersonFound?found -> 
+					setfound!found -> SKIP; 
+					alt_Operator_1;
+					loop_Operator_1
+				) 
+
+				[]
+
+				(not(x))&(SKIP)
+
+				)
+
+
+
+
+
+	-- Handling of guards for loop and alt constructs
+
+			
+
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+
+	
+
+	evaluation = reset_counters; guards_response
+	
+
+	counters = Counter_ID_1(0) 
+
+	
+
+	Counter_ID_1(count) = 
+
+				getCount.ID_LOOP.1!count -> Counter_ID_1(count)
+
+				[]
+
+				setCount.ID_LOOP.1?x__ -> Counter_ID_1(x__)
+
+				[]
+
+				terminate -> SKIP
+
+	
+
+	
+
+	reset_counters = setCount.ID_LOOP.1!0 -> SKIP
+
+	
+
+	
+
+	guards_response = alt?ID_ALT.x -> ((x==1)&(getfound?found -> (
+
+				(found == true)&(guard.ID_ALT.1.1!true -> SKIP)
+
+				[] not((found == true))&(guard.ID_ALT.1.1!false -> SKIP)))); guards_response
+
+			[] loop?ID_LOOP.id -> ((id==1)&(getfound?found -> getCount.ID_LOOP.1?x -> (
+
+				not(found==false)&(setCount.ID_LOOP.1!0 -> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+
+				[] (x<loop_1_min_count and found==false)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+
+				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+
+				[] (not(x<loop_1_min_count) and not(x>=loop_1_max_count) and found==false)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+
+				[] ((x>=loop_1_min_count and x<loop_1_max_count) and found==false)&((setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP))))); guards_response
+
+			[] terminate -> SKIP
+
+		
+
+			
+	-- Variable Memory declarations
+	
+
+	varMemory = Memory_flightPlan(SearchType_AreaSearch)
+
+					 [| { terminate } |] (((
+
+					 Memory_areaCoords(((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)))
+
+					 [| { terminate } |]
+
+					Memory_found(false))
+					
+					[| { terminate } |] 
+					
+					Memory_homeCoord((0,0,0,0))) 
+					
+					[| { terminate } |] 
+					
+					Memory_direction(Direction_Up))
+
+
+
+	Memory_flightPlan(flightPlan) =
+
+				getflightPlan!flightPlan -> Memory_flightPlan(flightPlan)
+
+				[]
+
+				setflightPlan?x__ -> Memory_flightPlan(x__)
+
+				[]
+
+				terminate -> SKIP
+								
+
+	Memory_areaCoords(areaCoords) =
+
+				getareaCoords!areaCoords -> Memory_areaCoords(areaCoords)
+
+				[] 
+
+				setareaCoords?x__ -> Memory_areaCoords(x__)
+
+				[]
+
+				terminate -> SKIP
+
+
+	Memory_homeCoord(homeCoord) =
+
+				gethomeCoord!homeCoord -> Memory_homeCoord(homeCoord)
+
+				[] 
+
+				sethomeCoord?x__ -> Memory_homeCoord(x__)
+
+				[]
+
+				terminate -> SKIP
+				
+
+	Memory_found(found) =
+
+				getfound!found -> Memory_found(found)
+
+				[]
+
+				setfound?x__ -> Memory_found(x__)
+
+				[]
+
+				terminate -> SKIP
+		
+				
+	Memory_direction(direction) =
+
+				getdirection!direction -> Memory_direction(direction)
+
+				[]
+
+				setdirection?x__ -> Memory_direction(x__)
+
+				[]
+
+				terminate -> SKIP
+
+}
+
+
+-- Lifeline alphabets
+
+A_Pilot = 
+	union(
+		{|
+			InputFlightPlan,PowerHandheld,PowerDrone,InputHomeCoordinate,
+			InputAreaCoordinates,StopSearch,ReturnToHome,InformPilotToStopSearch,
+			ManualControlOfUAV,ManualMovement,FollowFlightPlan,ProvideFlightPlan,
+			guard.ID_ALT.1,alt.ID_ALT.1,guard.ID_LOOP.1,loop.ID_LOOP.1,terminate
+		|},
+	flightPlanVars)
+
+
+
+A_Handheld = 
+	{|
+		InputFlightPlan,FollowPlan,OnOffDrone,StopSearch,
+		DroneStopSearch,PowerHandheld,PowerDrone,InputHomeCoordinate,
+		InputAreaCoordinates,FlyToAreaCoordinates,StopSearch,
+		ReturnToHome,FlyToCoordinate,ManualControlOfUAV,ManualMovement,
+		MoveDrone,FollowFlightPlan,guard.ID_ALT.1,alt.ID_ALT.1,
+		guard.ID_LOOP.1,loop.ID_LOOP.1,terminate
+	|}
+
+
+
+A_Operator = 
+	{|
+		MissingPersonFound,InformPilotToStopSearch,terminate,guard.ID_LOOP.1,
+		loop.ID_LOOP.1,guard.ID_ALT.1,alt.ID_ALT.1
+	|}
+
+
+A_Drone = 
+	{|	
+		terminate,FollowPlan,DroneStopSearch,FlyToAreaCoordinates,OnOffDrone,
+		MoveDrone,FlyToCoordinate,loop.ID_LOOP.1,guard.ID_LOOP.1,guard.ID_ALT.1,alt.ID_ALT.1
+	|}
+
+
+A_World = 
+	{| 
+		terminate, ProvideFlightPlan
+	|}
+
+
+-- Loop counters
+
+A_Counters = countVars
+countVars = {|getCount,setCount|}
+
+
+
+-- Variable setters and getters
+
+sharedVars = 
+	union(
+		union(
+			union(
+				union(flightPlanVars,foundVars),
+			areaCoordinateVars),
+		homeCoordinateVars),
+	directionVars)
+
+
+flightPlanVars = {|setflightPlan,getflightPlan|}
+foundVars = {|getfound,setfound|}
+areaCoordinateVars = {|getareaCoords,setareaCoords|}
+homeCoordinateVars = {|gethomeCoord,sethomeCoord|}
+directionVars = {|getdirection,setdirection|}
+
+
+gets = {| getfound,getflightPlan,getareaCoords,gethomeCoord,getdirection |}
+
+
+
+
+
+
+TRUN(S)=RUN(union(S, {tock}))
+seconds(t)=t
+s(t) = seconds(t)
+
+
+Timed(OneStep) {
+	ADeadline(S,E,d) = EndBy(TRUN(S),d) [|E|> SKIP
+	
+	
+	-- All events and operations expected within the system operation, excluding terminate
+	
+	ALL = union(union({|
+		ProvideFlightPlan,
+		InputFlightPlan,
+		FollowFlightPlan,
+		FollowPlan,
+		InputHomeCoordinate,
+		InputAreaCoordinates,
+		FlyToAreaCoordinates,
+		MissingPersonFound,
+		InformPilotToStopSearch,
+		StopSearch,
+		DroneStopSearch,
+		ReturnToHome,
+		FlyToCoordinate,
+		ManualControlOfUAV,
+		ManualMovement,
+		MoveDrone,
+		PowerDrone,
+		OnOffDrone,
+		PowerHandheld,
+		GetDroneBatteryStatus,
+		GetBatteryStatus,
+		DisplayStatus,
+		DisplayDroneBatteryStatus,
+		SAR_Handheld::FollowFlightPlan.in,
+		SAR_Handheld::InputFlightPlan.in,
+		SAR_Handheld::InputAreaCoordinates.in,
+		SAR_Handheld::InputHomeCoordinate.in,
+		SAR_Handheld::InputCoordinate.in,
+		SAR_Handheld::ManualMovement.in,
+		SAR_Handheld::StopSearch.in,
+		SAR_Handheld::ReturnToHome.in,
+		SAR_Handheld::PowerDrone.in,
+		SAR_Handheld::PowerHandheld.in,
+		SAR_Handheld::DisplayStatus.in,
+		SAR_Handheld::GetDroneBatteryStatus.in,
+		
+		SAR_Handheld::OnOffDroneCall,
+		SAR_Handheld::FollowPlanCall,
+		SAR_Handheld::MoveDroneCall,
+		SAR_Handheld::FlyToCoordinateCall,
+		SAR_Handheld::FlyToAreaCoordinatesCall,
+		SAR_Handheld::DroneStopSearchCall,
+		SAR_Handheld::stopHandheldOperatingCall,
+		SAR_Handheld::DisplayDroneBatteryStatusCall,
+		SAR_Handheld::powerDroneAutomaticallyCall,
+		SAR_Handheld::GetBatteryStatusCall,
+		
+		SAR_SW::GetBatteryStatus.in,
+		SAR_SW::OnOffDrone.in, 
+		SAR_SW::FlyToAreaCoordinates.in,
+		SAR_SW::FlyToCoordinate.in, 
+		SAR_SW::FollowPlan.in, 
+		SAR_SW::DroneStopSearch.in, 
+		SAR_SW::MoveDrone.in,
+		
+		SAR_SW::DisplayStatusCall,
+		SAR_SW::movementCall,
+		SAR_SW::directionMovementCall
+	|},sharedVars),{|tock|})
+	
+	
+	-- Renaming of software models
+	
+	Interface = SAR_Handheld::O__(0,1,1,1,1,1)
+			[[
+				SAR_Handheld::OnOffDroneCall <- OnOffDrone,
+				SAR_Handheld::PowerHandheld.in <- PowerHandheld, 
+				SAR_Handheld::InputFlightPlan.in.x <- InputFlightPlan.x, 
+				SAR_Handheld::FollowFlightPlan.in <- FollowFlightPlan, 
+				SAR_Handheld::InputHomeCoordinate.in.y <-InputHomeCoordinate.y, 
+				SAR_Handheld::InputAreaCoordinates.in.z <- InputAreaCoordinates.z, 
+				SAR_Handheld::StopSearch.in <- StopSearch, 
+				SAR_Handheld::DroneStopSearchCall <- DroneStopSearch, 
+				SAR_Handheld::ReturnToHome.in <- ReturnToHome, 
+				SAR_Handheld::FollowPlanCall.t <- FollowPlan.t, 
+				SAR_Handheld::PowerDrone.in <- PowerDrone, 
+				SAR_Handheld::FlyToAreaCoordinatesCall.v <- FlyToAreaCoordinates.v, 
+				SAR_Handheld::FlyToCoordinateCall <- FlyToCoordinate, 
+				SAR_Handheld::ManualMovement.in.u <- ManualMovement.u, 
+				SAR_Handheld::MoveDroneCall.w <- MoveDrone.w, 
+				SAR_Handheld::DisplayStatus.in <- DisplayStatus,
+				SAR_Handheld::GetDroneBatteryStatus.in <- GetDroneBatteryStatus,
+				SAR_Handheld::DisplayDroneBatteryStatusCall.s <- DisplayDroneBatteryStatus.s,
+				SAR_Handheld::GetBatteryStatusCall <- GetBatteryStatus, 
+				SAR_Handheld::terminate <- terminate | 
+				s: Status,
+				t: SearchType, 
+				u: Direction, 
+				v: AreaCoords, 
+				w: Direction, 
+				x: SearchType, 
+				y: Coord, 
+				z: AreaCoords
+			]] 
+	
+	
+	Device = SAR_SW::O__(0,1,1,1,1)
+			[[
+				SAR_SW::OnOffDrone.in <- OnOffDrone, 
+				SAR_SW::FlyToAreaCoordinates.in.z <- FlyToAreaCoordinates.z,
+				SAR_SW::FlyToCoordinate.in.v <- FlyToCoordinate.v, 
+				SAR_SW::FollowPlan.in.x <- FollowPlan.x, 
+				SAR_SW::DroneStopSearch.in <- DroneStopSearch, 
+				SAR_SW::MoveDrone.in.y <- MoveDrone.y,
+				SAR_SW::GetBatteryStatus.in <- GetBatteryStatus,
+				SAR_SW::DisplayStatusCall.s <- DisplayStatus.s,
+				SAR_SW::terminate <- terminate| 
+				s: Status,
+				z: AreaCoords, 
+				v: Coord, 
+				y: Direction, 
+				x: SearchType
+			]]
+	
+	
+	-- Models combined in parallel
+	
+	SystemModels = AreaSearch 
+			[|{|
+				InputFlightPlan,
+				FollowFlightPlan,
+				FollowPlan,
+				InputHomeCoordinate,
+				InputAreaCoordinates,
+				FlyToAreaCoordinates, 
+				StopSearch,
+				DroneStopSearch,
+				ReturnToHome,
+				FlyToCoordinate,
+				ManualMovement,
+				MoveDrone,
+				PowerDrone,
+				OnOffDrone,
+				PowerHandheld,
+				GetDroneBatteryStatus,
+				DisplayDroneBatteryStatus,
+				GetBatteryStatus,
+				DisplayStatus,
+				terminate
+			|}|] 
+		(((Interface; SKIP) 
+			[|{|
+				OnOffDrone,
+				FollowPlan,
+				FlyToAreaCoordinates,
+				DroneStopSearch,
+				FlyToCoordinate,
+				MoveDrone,
+				DisplayStatus,
+				GetBatteryStatus
+			|}|]
+		(Device; SKIP)); terminate -> SKIP)
+
+
+}
+

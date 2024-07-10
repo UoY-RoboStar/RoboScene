@@ -1,0 +1,18 @@
+
+--
+-- RoboChart generator version 3.0.0.202209090727
+-- Automatically generated on 19-06-2024 12:20:52
+--
+-- Iterated compression status: true
+-- Assertions compression status: false
+--
+
+-- data definitions used by platform:/resource/SAR%20-%20FM24/handheld.rct
+datatype SystemPower = SystemPower_On | SystemPower_Off
+SystemPower_is(SystemPower_On,SystemPower_On) = true
+SystemPower_is(_,SystemPower_On) = false
+SystemPower_is(SystemPower_Off,SystemPower_Off) = true
+SystemPower_is(_,SystemPower_Off) = false
+
+
+	

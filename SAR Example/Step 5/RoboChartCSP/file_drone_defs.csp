@@ -1,0 +1,74 @@
+
+--
+-- RoboChart generator version 3.0.0.202209090727
+-- Automatically generated on 19-06-2024 12:19:47
+--
+-- Iterated compression status: true
+-- Assertions compression status: false
+--
+
+-- data definitions used by platform:/resource/SAR%20-%20FM24/drone.rct
+datatype Power = Power_On | Power_Off
+Power_is(Power_On,Power_On) = true
+Power_is(_,Power_On) = false
+Power_is(Power_Off,Power_Off) = true
+Power_is(_,Power_Off) = false
+
+datatype Status = Status_High | Status_Low
+Status_is(Status_High,Status_High) = true
+Status_is(_,Status_High) = false
+Status_is(Status_Low,Status_Low) = true
+Status_is(_,Status_Low) = false
+
+nametype Coord = ({(0,0,0,0),(0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)})
+Coord_lat((lat,lon,alt,heading)) = lat
+update_Coord_lat((lat,lon,alt,heading),v__) = (v__,lon,alt,heading)
+Coord_lon((lat,lon,alt,heading)) = lon
+update_Coord_lon((lat,lon,alt,heading),v__) = (lat,v__,alt,heading)
+Coord_alt((lat,lon,alt,heading)) = alt
+update_Coord_alt((lat,lon,alt,heading),v__) = (lat,lon,v__,heading)
+Coord_heading((lat,lon,alt,heading)) = heading
+update_Coord_heading((lat,lon,alt,heading),v__) = (lat,lon,alt,v__)
+datatype Direction = Direction_Up | Direction_Down | Direction_Left | Direction_Right | Direction_Forward | Direction_Backward
+Direction_is(Direction_Up,Direction_Up) = true
+Direction_is(_,Direction_Up) = false
+Direction_is(Direction_Down,Direction_Down) = true
+Direction_is(_,Direction_Down) = false
+Direction_is(Direction_Left,Direction_Left) = true
+Direction_is(_,Direction_Left) = false
+Direction_is(Direction_Right,Direction_Right) = true
+Direction_is(_,Direction_Right) = false
+Direction_is(Direction_Forward,Direction_Forward) = true
+Direction_is(_,Direction_Forward) = false
+Direction_is(Direction_Backward,Direction_Backward) = true
+Direction_is(_,Direction_Backward) = false
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+SearchType_is(SearchType_AreaSearch,SearchType_AreaSearch) = true
+SearchType_is(_,SearchType_AreaSearch) = false
+SearchType_is(SearchType_RapidParallelLine,SearchType_RapidParallelLine) = true
+SearchType_is(_,SearchType_RapidParallelLine) = false
+SearchType_is(SearchType_Linear,SearchType_Linear) = true
+SearchType_is(_,SearchType_Linear) = false
+SearchType_is(SearchType_CreepingLine,SearchType_CreepingLine) = true
+SearchType_is(_,SearchType_CreepingLine) = false
+SearchType_is(SearchType_PointOfInterest,SearchType_PointOfInterest) = true
+SearchType_is(_,SearchType_PointOfInterest) = false
+SearchType_is(SearchType_MountainFace,SearchType_MountainFace) = true
+SearchType_is(_,SearchType_MountainFace) = false
+SearchType_is(SearchType_WoodedArea,SearchType_WoodedArea) = true
+SearchType_is(_,SearchType_WoodedArea) = false
+SearchType_is(SearchType_Avalanche,SearchType_Avalanche) = true
+SearchType_is(_,SearchType_Avalanche) = false
+
+nametype AreaCoords = ({((0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0)),((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0))})
+AreaCoords_Corner1((Corner1,Corner2,Corner3,Corner4)) = Corner1
+update_AreaCoords_Corner1((Corner1,Corner2,Corner3,Corner4),v__) = (v__,Corner2,Corner3,Corner4)
+AreaCoords_Corner2((Corner1,Corner2,Corner3,Corner4)) = Corner2
+update_AreaCoords_Corner2((Corner1,Corner2,Corner3,Corner4),v__) = (Corner1,v__,Corner3,Corner4)
+AreaCoords_Corner3((Corner1,Corner2,Corner3,Corner4)) = Corner3
+update_AreaCoords_Corner3((Corner1,Corner2,Corner3,Corner4),v__) = (Corner1,Corner2,v__,Corner4)
+AreaCoords_Corner4((Corner1,Corner2,Corner3,Corner4)) = Corner4
+update_AreaCoords_Corner4((Corner1,Corner2,Corner3,Corner4),v__) = (Corner1,Corner2,Corner3,v__)
+
+	

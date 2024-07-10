@@ -1,0 +1,102 @@
+Capabilities
+	lifeline Pilot
+		out Turn on controller -> Handheld
+		out Turn on UAV -> Handheld
+		out Set Return to Home -> Handheld
+		out Initiate Matrix Search Programme -> Handheld
+		out Exit Matrix Search Programme -> Handheld
+		out Initiate Return to Home function -> Handheld
+		out Take Control of UAV -> Handheld
+		out Land UAV -> Handheld
+
+	lifeline Handheld
+
+	lifeline Drone
+
+	lifeline Operator
+		var found: boolean
+		in MissingPersonFound: boolean -> Operator
+		out Listen and communicate with payload operator
+		
+	lifeline World
+		out Develop flight plan -> Pilot
+	
+	Time
+		const minDecisionTime: int = ?
+		const maxDecisionTime: int = ?
+		const loop_min_count: int = 0
+		const loop_max_count: int = 10
+		
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Operator, World
+	
+	Sequence AreaSearch
+		Actors Pilot, Handheld, Operator, World
+		Vars found
+		
+		World->>Pilot: Develop flight plan
+		Pilot->>Handheld: Turn on controller
+		Pilot->>Handheld: Turn on UAV
+		Pilot->>Handheld: Set Return to Home
+		Pilot->>Handheld:  Initiate Matrix Search Programme
+		loop (0,10)
+		    wait([minDecisionTime,maxDecisionTime]) on Operator
+		    Operator->>Operator: MissingPersonFound?found
+		    Operator->>Pilot: Listen and communicate with payload operator
+		end
+		Pilot->>Handheld: Exit Matrix Search Programme
+		Pilot->>Handheld: Initiate Return to Home function
+		Pilot->>Handheld: Take Control of UAV
+		Pilot->>Handheld: Land UAV
+
+
+SequenceDiagramGroup 
+	Name: Not Ideal Human-Interaction - Trained 
+	Trait: Trained
+	Actors: Pilot, Handheld, Operator, Drone
+	
+	Sequence AreaSearch with Fatigued Operator
+		Actors Pilot, Handheld, Operator, World
+		Vars found
+		
+		World->>Pilot: Develop flight plan
+		Pilot->>Handheld: Turn on controller
+		Pilot->>Handheld: Turn on UAV
+		Pilot->>Handheld: Set Return to Home
+		Pilot->>Handheld:  Initiate Matrix Search Programme
+		loop (0,10)
+		    wait([minDecisionTime+5,maxDecisionTime+5]) on Operator
+		    Operator->>Operator: MissingPersonFound?found
+		    Operator->>Pilot: Listen and communicate with payload operator
+		end
+		Pilot->>Handheld: Exit Matrix Search Programme
+		Pilot->>Handheld: Initiate Return to Home function
+		Pilot->>Handheld: Take Control of UAV
+		Pilot->>Handheld: Land UAV
+
+		
+	Sequence AreaSearch with Operator under Pressure
+		Actors Pilot, Handheld, Operator, World
+		Vars found
+		
+		World->>Pilot: Develop flight plan
+		Pilot->>Handheld: Turn on controller
+		Pilot->>Handheld: Turn on UAV
+		Pilot->>Handheld: Set Return to Home
+		Pilot->>Handheld:  Initiate Matrix Search Programme
+		loop (0,10)
+		    wait([minDecisionTime-2,maxDecisionTime-2]) on Operator
+		    Operator->>Operator: MissingPersonFound?found
+		    Operator->>Pilot: Listen and communicate with payload operator
+		end
+		Pilot->>Handheld: Exit Matrix Search Programme
+		Pilot->>Handheld: Initiate Return to Home function
+		Pilot->>Handheld: Take Control of UAV
+		Pilot->>Handheld: Land UAV
+
+
+
+
