@@ -1,7 +1,7 @@
 
 --
 -- RoboChart generator version 3.0.0.202209090727
--- Automatically generated on 19-06-2024 12:20:52
+-- Automatically generated on 18-07-2024 16:46:05
 --
 -- Iterated compression status: true
 -- Assertions compression status: false
@@ -111,13 +111,13 @@ module SAR_Handheld
 			channel set_EXT_FlightPlan: SearchType
 			
 			-- declaring call and ret events for undefined operations
-			channel OnOffDroneCall
 			channel MoveDroneCall: Direction
-			channel DroneStopSearchCall
-			channel FlyToCoordinateCall: Coord
 			channel FlyToAreaCoordinatesCall: AreaCoords
-			channel FollowPlanCall: SearchType
+			channel OnOffDroneCall
 			channel stopHandheldOperatingCall: core_boolean.core_nat
+			channel FollowPlanCall: SearchType
+			channel FlyToCoordinateCall: Coord
+			channel DroneStopSearchCall
 			
 			-- declaring controller termination channel
 			channel terminate
@@ -136,13 +136,13 @@ module SAR_Handheld
 			,	set_EXT_systemDroneOn, set_systemDroneOn,
 				set_EXT_systemHandheld, set_systemHandheld,
 				set_EXT_FlightPlan, set_FlightPlan
-			,	OnOffDroneCall,
-				MoveDroneCall,
-				DroneStopSearchCall,
-				FlyToCoordinateCall,
+			,	MoveDroneCall,
 				FlyToAreaCoordinatesCall,
+				OnOffDroneCall,
+				stopHandheldOperatingCall,
 				FollowPlanCall,
-				stopHandheldOperatingCall
+				FlyToCoordinateCall,
+				DroneStopSearchCall
 			|}
 			
 			-- set of visible memory events
@@ -213,10 +213,10 @@ module SAR_Handheld
 				
 				-- Declaring call and ret events for undefined operations
 				channel MoveDroneCall: Direction
-				channel DroneStopSearchCall
-				channel FlyToCoordinateCall: Coord
 				channel FlyToAreaCoordinatesCall: AreaCoords
 				channel FollowPlanCall: SearchType
+				channel FlyToCoordinateCall: Coord
+				channel DroneStopSearchCall
 				
 				enterSS = {|
 				i0::enter,
@@ -256,10 +256,10 @@ module SAR_Handheld
 					StopSearch,
 					ReturnToHome
 				,	MoveDroneCall,
-					DroneStopSearchCall,
-					FlyToCoordinateCall,
 					FlyToAreaCoordinatesCall,
-					FollowPlanCall
+					FollowPlanCall,
+					FlyToCoordinateCall,
+					DroneStopSearchCall
 					|}
 				
 				channel clockReset, clockResetL, clockResetR 
@@ -267,31 +267,11 @@ module SAR_Handheld
 				localClockResets = {||}
 				
 				
-				channel get_CLID_f0 : core_clock_type 
-				channel get_CLID_WaitForInput : core_clock_type 
 				channel get_CLID_s0 : core_clock_type 
+				channel get_CLID_f0 : core_clock_type 
 				channel get_CLID_ExecuteFlightPlan : core_clock_type 
+				channel get_CLID_WaitForInput : core_clock_type 
 				--channel increment__
-				
-				CLID_f0_clock_type(id__,
-						          const_PilotDisplayStm_hToDCommTime) = 
-					let
-						max = (clock_type_max(Union({
-				{}
-				}))+1)
-					ctype = {0..max}
-				within
-					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
-				
-				CLID_WaitForInput_clock_type(id__,
-						          const_PilotDisplayStm_hToDCommTime) = 
-					let
-						max = (clock_type_max(Union({
-				{}
-				}))+1)
-					ctype = {0..max}
-				within
-					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 				
 				CLID_s0_clock_type(id__,
 						          const_PilotDisplayStm_hToDCommTime) = 
@@ -303,7 +283,27 @@ module SAR_Handheld
 				within
 					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 				
+				CLID_f0_clock_type(id__,
+						          const_PilotDisplayStm_hToDCommTime) = 
+					let
+						max = (clock_type_max(Union({
+				{}
+				}))+1)
+					ctype = {0..max}
+				within
+					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
+				
 				CLID_ExecuteFlightPlan_clock_type(id__,
+						          const_PilotDisplayStm_hToDCommTime) = 
+					let
+						max = (clock_type_max(Union({
+				{}
+				}))+1)
+					ctype = {0..max}
+				within
+					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
+				
+				CLID_WaitForInput_clock_type(id__,
 						          const_PilotDisplayStm_hToDCommTime) = 
 					let
 						max = (clock_type_max(Union({
@@ -497,10 +497,20 @@ module SAR_Handheld
 						channel StopSearch__: NIDS.InOut
 						channel ReturnToHome__: NIDS.InOut
 						
+						channel get_CLID_f0 : core_clock_type 
 						channel get_CLID_s0 : core_clock_type 
 						channel get_CLID_WaitForInput : core_clock_type 
-						channel get_CLID_f0 : core_clock_type 
 						--channel increment__
+						
+						CLID_f0_clock_type(id__,
+								          const_PilotDisplayStm_hToDCommTime) = 
+							let
+								max = (clock_type_max(Union({
+						{}
+						}))+1)
+							ctype = {0..max}
+						within
+							if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 						
 						CLID_s0_clock_type(id__,
 								          const_PilotDisplayStm_hToDCommTime) = 
@@ -513,16 +523,6 @@ module SAR_Handheld
 							if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 						
 						CLID_WaitForInput_clock_type(id__,
-								          const_PilotDisplayStm_hToDCommTime) = 
-							let
-								max = (clock_type_max(Union({
-						{}
-						}))+1)
-							ctype = {0..max}
-						within
-							if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
-						
-						CLID_f0_clock_type(id__,
 								          const_PilotDisplayStm_hToDCommTime) = 
 							let
 								max = (clock_type_max(Union({
@@ -858,8 +858,50 @@ module SAR_Handheld
 									 								   i0::D__(id__,
 									 								   		    const_PilotDisplayStm_hToDCommTime)
 									 								   [| { share__, terminate } |] (
-									 								   WaitForInput::D__(id__,
-									 								   		    const_PilotDisplayStm_hToDCommTime)
+									 								   ((
+									 								    ((WaitForInput::D__(id__,
+									 								    		    const_PilotDisplayStm_hToDCommTime))
+									 								     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									 								     [[set_aFlightPlan <- setL_aFlightPlan]]
+									 								    )
+									 								    [| union({|WaitForInput::entered,WaitForInput::interrupt,terminate|},{|share__
+									 								    			,setL_aFlightPlan
+									 								   |}) |]
+									 								    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									 								     let
+									 								     	sTransitionDeadline_t1 =
+									 								     		let
+									 								     			Inactive = share__choice(WaitForInput::entered -> Entered)
+									 								     			
+									 								     			Entered = Active /\ (WaitForInput::interrupt -> Inactive)
+									 								     			
+									 								     			Active =
+									 								     				(ShareUntilTrue;
+									 								     				 (ShareUntilFalse /\ (WAIT(15);USTOP)) ;
+									 								     				 Active
+									 								     				)
+									 								     		
+									 								     			ShareUntilTrue = 
+									 								     				share__choice(get_aFlightPlan?aFlightPlan -> TimeOut_1(
+									 								     					(((aFlightPlan==SearchType_AreaSearch))&SKIP
+									 								     				 	[]
+									 								     				 	(not (aFlightPlan==SearchType_AreaSearch))&share__->ShareUntilTrue),ShareUntilTrue))
+									 								     		
+									 								     			ShareUntilFalse = 
+									 								     				share__choice(get_aFlightPlan?aFlightPlan -> TimeOut_1(
+									 								     					((not (aFlightPlan==SearchType_AreaSearch))&SKIP
+									 								     				 	[]
+									 								     				 	((aFlightPlan==SearchType_AreaSearch))&share__->ShareUntilFalse),ShareUntilFalse))
+									 								     		within
+									 								     			Inactive /\ terminate -> SKIP
+									 								     within
+									 								     	[| {WaitForInput::entered, WaitForInput::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t1} @ proc__
+									 								    )
+									 								    )
+									 								     [[ share__ <- x__ | x__ <- {| share__,setL_aFlightPlan |} ]]
+									 								    )
+									 								   )[[setL_aFlightPlan <- set_aFlightPlan]]
+									 								   )
 									 								   [| { share__, terminate } |] (
 									 								   f0::D__(id__,
 									 								   		    const_PilotDisplayStm_hToDCommTime)
@@ -875,23 +917,23 @@ module SAR_Handheld
 									 								 [[s0::interrupt <- x__ | x__ <- {|interrupt,internal__.NID_s0|}]]
 									 								 [[i0::interrupt <- x__ | x__ <- {|internal__.NID_i0|}]]
 									 								 )
-									 								  [[ share__ <- x__ | x__ <- {| share__,setR_aAreaSearchPoints,setR_aWayPoint |} ]] 
-									 								  [[set_systemDroneOn <- setL_systemDroneOn,set_systemHandheld <- setL_systemHandheld,set_aFlightPlan <- setL_aFlightPlan]]
+									 								  [[ share__ <- x__ | x__ <- {| share__,setR_aWayPoint,setR_aAreaSearchPoints |} ]] 
+									 								  [[set_aFlightPlan <- setL_aFlightPlan,set_systemDroneOn <- setL_systemDroneOn,set_systemHandheld <- setL_systemHandheld]]
 									 								 )
 									 								 [| union(union(union(flowevts,transSync),{terminate}),{|share__
+									 								 			,setL_aFlightPlan
 									 								 			,setL_systemDroneOn
 									 								 			,setL_systemHandheld
-									 								 			,setL_aFlightPlan
-									 								 			,setR_aAreaSearchPoints
-									 								 			 			,setR_aWayPoint
+									 								 			,setR_aWayPoint
+									 								 			 			,setR_aAreaSearchPoints
 									 								 			|}) |]
 									 								 ((i0::enter -> Transitions(id__,
 									 								 		    const_PilotDisplayStm_hToDCommTime))
-									 								  [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn,setL_systemHandheld,setL_aFlightPlan |} ]]
-									 								  [[set_aAreaSearchPoints <- setR_aAreaSearchPoints,set_aWayPoint <- setR_aWayPoint]]
+									 								  [[ share__ <- x__ | x__ <- {| share__,setL_aFlightPlan,setL_systemDroneOn,setL_systemHandheld |} ]]
+									 								  [[set_aWayPoint <- setR_aWayPoint,set_aAreaSearchPoints <- setR_aAreaSearchPoints]]
 									 								 )
-									 								)[[setL_systemDroneOn <- set_systemDroneOn,setL_systemHandheld <- set_systemHandheld,setL_aFlightPlan <- set_aFlightPlan]]
-									 								 [[setR_aAreaSearchPoints <- set_aAreaSearchPoints,setR_aWayPoint <- set_aWayPoint]]
+									 								)[[setL_aFlightPlan <- set_aFlightPlan,setL_systemDroneOn <- set_systemDroneOn,setL_systemHandheld <- set_systemHandheld]]
+									 								 [[setR_aWayPoint <- set_aWayPoint,setR_aAreaSearchPoints <- set_aAreaSearchPoints]]
 									 								)
 									 							)
 									 							 \ hideSet)
@@ -907,51 +949,51 @@ module SAR_Handheld
 									 								| x____ <- NIDS
 									 							]]
 									 						)
-									 						[| {|get_CLID_f0,f0::entered,terminate|} |]
-									 						dbisim(Clock_CLID_f0(id__,0,
+									 						[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
+									 						dbisim(Clock_CLID_WaitForInput(id__,0,
 									 								          const_PilotDisplayStm_hToDCommTime))
-									 					)\{|get_CLID_f0|}
+									 					)\{|get_CLID_WaitForInput|}
 									 				)
-									 				[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
-									 				dbisim(Clock_CLID_WaitForInput(id__,0,
+									 				[| {|get_CLID_s0,s0::entered,terminate|} |]
+									 				dbisim(Clock_CLID_s0(id__,0,
 									 						          const_PilotDisplayStm_hToDCommTime))
-									 			)\{|get_CLID_WaitForInput|}
+									 			)\{|get_CLID_s0|}
 									 		)
-									 		[| {|get_CLID_s0,s0::entered,terminate|} |]
-									 		dbisim(Clock_CLID_s0(id__,0,
+									 		[| {|get_CLID_f0,f0::entered,terminate|} |]
+									 		dbisim(Clock_CLID_f0(id__,0,
 									 				          const_PilotDisplayStm_hToDCommTime))
-									 	)\{|get_CLID_s0|}
+									 	)\{|get_CLID_f0|}
 									 )
 									 ))
-									  [[ share__ <- x__ | x__ <- {| share__,setR_adirection,setR_systemDroneOn,setR_aAreaSearchPoints,setR_aHomeCoord,setR_flightPlanFinished,setR_FlightPlan,setR_aWayPoint,setR_aFlightPlan,setR_systemHandheld |} ]] 
-									  [[set_adirection <- setL_adirection,set_systemDroneOn <- setL_systemDroneOn,set_aAreaSearchPoints <- setL_aAreaSearchPoints,set_aHomeCoord <- setL_aHomeCoord,set_flightPlanFinished <- setL_flightPlanFinished,set_FlightPlan <- setL_FlightPlan,set_aWayPoint <- setL_aWayPoint,set_aFlightPlan <- setL_aFlightPlan,set_systemHandheld <- setL_systemHandheld]]
+									  [[ share__ <- x__ | x__ <- {| share__,setR_flightPlanFinished,setR_FlightPlan,setR_aFlightPlan,setR_aWayPoint,setR_systemDroneOn,setR_adirection,setR_aAreaSearchPoints,setR_aHomeCoord,setR_systemHandheld |} ]] 
+									  [[set_flightPlanFinished <- setL_flightPlanFinished,set_FlightPlan <- setL_FlightPlan,set_aFlightPlan <- setL_aFlightPlan,set_aWayPoint <- setL_aWayPoint,set_systemDroneOn <- setL_systemDroneOn,set_adirection <- setL_adirection,set_aAreaSearchPoints <- setL_aAreaSearchPoints,set_aHomeCoord <- setL_aHomeCoord,set_systemHandheld <- setL_systemHandheld]]
 									 )
 									 [| union(union(enteredSS,{| interrupt, terminate |}),{|share__
-									 			,setL_adirection
-									 			,setL_systemDroneOn
-									 			,setL_aAreaSearchPoints
-									 			,setL_aHomeCoord
 									 			,setL_flightPlanFinished
 									 			,setL_FlightPlan
-									 			,setL_aWayPoint
 									 			,setL_aFlightPlan
+									 			,setL_aWayPoint
+									 			,setL_systemDroneOn
+									 			,setL_adirection
+									 			,setL_aAreaSearchPoints
+									 			,setL_aHomeCoord
 									 			,setL_systemHandheld
-									 			,setR_adirection
+									 			,setR_flightPlanFinished
+									 			 			,setR_FlightPlan
+									 			 			,setR_aFlightPlan
+									 			 			,setR_aWayPoint
 									 			 			,setR_systemDroneOn
+									 			 			,setR_adirection
 									 			 			,setR_aAreaSearchPoints
 									 			 			,setR_aHomeCoord
-									 			 			,setR_flightPlanFinished
-									 			 			,setR_FlightPlan
-									 			 			,setR_aWayPoint
-									 			 			,setR_aFlightPlan
 									 			 			,setR_systemHandheld
 									 			|}) |]
 									 ((During)
-									  [[ share__ <- x__ | x__ <- {| share__,setL_adirection,setL_systemDroneOn,setL_aAreaSearchPoints,setL_aHomeCoord,setL_flightPlanFinished,setL_FlightPlan,setL_aWayPoint,setL_aFlightPlan,setL_systemHandheld |} ]]
-									  [[set_adirection <- setR_adirection,set_systemDroneOn <- setR_systemDroneOn,set_aAreaSearchPoints <- setR_aAreaSearchPoints,set_aHomeCoord <- setR_aHomeCoord,set_flightPlanFinished <- setR_flightPlanFinished,set_FlightPlan <- setR_FlightPlan,set_aWayPoint <- setR_aWayPoint,set_aFlightPlan <- setR_aFlightPlan,set_systemHandheld <- setR_systemHandheld]]
+									  [[ share__ <- x__ | x__ <- {| share__,setL_flightPlanFinished,setL_FlightPlan,setL_aFlightPlan,setL_aWayPoint,setL_systemDroneOn,setL_adirection,setL_aAreaSearchPoints,setL_aHomeCoord,setL_systemHandheld |} ]]
+									  [[set_flightPlanFinished <- setR_flightPlanFinished,set_FlightPlan <- setR_FlightPlan,set_aFlightPlan <- setR_aFlightPlan,set_aWayPoint <- setR_aWayPoint,set_systemDroneOn <- setR_systemDroneOn,set_adirection <- setR_adirection,set_aAreaSearchPoints <- setR_aAreaSearchPoints,set_aHomeCoord <- setR_aHomeCoord,set_systemHandheld <- setR_systemHandheld]]
 									 )
-									)[[setL_adirection <- set_adirection,setL_systemDroneOn <- set_systemDroneOn,setL_aAreaSearchPoints <- set_aAreaSearchPoints,setL_aHomeCoord <- set_aHomeCoord,setL_flightPlanFinished <- set_flightPlanFinished,setL_FlightPlan <- set_FlightPlan,setL_aWayPoint <- set_aWayPoint,setL_aFlightPlan <- set_aFlightPlan,setL_systemHandheld <- set_systemHandheld]]
-									 [[setR_adirection <- set_adirection,setR_systemDroneOn <- set_systemDroneOn,setR_aAreaSearchPoints <- set_aAreaSearchPoints,setR_aHomeCoord <- set_aHomeCoord,setR_flightPlanFinished <- set_flightPlanFinished,setR_FlightPlan <- set_FlightPlan,setR_aWayPoint <- set_aWayPoint,setR_aFlightPlan <- set_aFlightPlan,setR_systemHandheld <- set_systemHandheld]]
+									)[[setL_flightPlanFinished <- set_flightPlanFinished,setL_FlightPlan <- set_FlightPlan,setL_aFlightPlan <- set_aFlightPlan,setL_aWayPoint <- set_aWayPoint,setL_systemDroneOn <- set_systemDroneOn,setL_adirection <- set_adirection,setL_aAreaSearchPoints <- set_aAreaSearchPoints,setL_aHomeCoord <- set_aHomeCoord,setL_systemHandheld <- set_systemHandheld]]
+									 [[setR_flightPlanFinished <- set_flightPlanFinished,setR_FlightPlan <- set_FlightPlan,setR_aFlightPlan <- set_aFlightPlan,setR_aWayPoint <- set_aWayPoint,setR_systemDroneOn <- set_systemDroneOn,setR_adirection <- set_adirection,setR_aAreaSearchPoints <- set_aAreaSearchPoints,setR_aHomeCoord <- set_aHomeCoord,setR_systemHandheld <- set_systemHandheld]]
 									)\union(enteredSS,{terminate}) 
 								)
 								During 		= share__choice(([] e__ : enteredSS @ e__ -> SKIP))
@@ -1003,8 +1045,50 @@ module SAR_Handheld
 									 								   i0::VS_O__(id__,
 									 								   		    const_PilotDisplayStm_hToDCommTime)
 									 								   [| { share__, terminate } |] (
-									 								   WaitForInput::VS_O__(id__,
-									 								   		    const_PilotDisplayStm_hToDCommTime)
+									 								   ((
+									 								    ((WaitForInput::VS_O__(id__,
+									 								    		    const_PilotDisplayStm_hToDCommTime))
+									 								     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									 								     [[set_aFlightPlan <- setL_aFlightPlan]]
+									 								    )
+									 								    [| union({|WaitForInput::entered,WaitForInput::interrupt,terminate|},{|share__
+									 								    			,setL_aFlightPlan
+									 								   |}) |]
+									 								    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									 								     let
+									 								     	sTransitionDeadline_t1 =
+									 								     		let
+									 								     			Inactive = share__choice(WaitForInput::entered -> Entered)
+									 								     			
+									 								     			Entered = Active /\ (WaitForInput::interrupt -> Inactive)
+									 								     			
+									 								     			Active =
+									 								     				(ShareUntilTrue;
+									 								     				 (ShareUntilFalse /\ (WAIT(15);USTOP)) ;
+									 								     				 Active
+									 								     				)
+									 								     		
+									 								     			ShareUntilTrue = 
+									 								     				share__choice(get_aFlightPlan?aFlightPlan -> TimeOut_1(
+									 								     					(((aFlightPlan==SearchType_AreaSearch))&SKIP
+									 								     				 	[]
+									 								     				 	(not (aFlightPlan==SearchType_AreaSearch))&share__->ShareUntilTrue),ShareUntilTrue))
+									 								     		
+									 								     			ShareUntilFalse = 
+									 								     				share__choice(get_aFlightPlan?aFlightPlan -> TimeOut_1(
+									 								     					((not (aFlightPlan==SearchType_AreaSearch))&SKIP
+									 								     				 	[]
+									 								     				 	((aFlightPlan==SearchType_AreaSearch))&share__->ShareUntilFalse),ShareUntilFalse))
+									 								     		within
+									 								     			Inactive /\ terminate -> SKIP
+									 								     within
+									 								     	[| {WaitForInput::entered, WaitForInput::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t1} @ proc__
+									 								    )
+									 								    )
+									 								     [[ share__ <- x__ | x__ <- {| share__,setL_aFlightPlan |} ]]
+									 								    )
+									 								   )[[setL_aFlightPlan <- set_aFlightPlan]]
+									 								   )
 									 								   [| { share__, terminate } |] (
 									 								   f0::VS_O__(id__,
 									 								   		    const_PilotDisplayStm_hToDCommTime)
@@ -1020,23 +1104,23 @@ module SAR_Handheld
 									 								 [[s0::interrupt <- x__ | x__ <- {|interrupt,internal__.NID_s0|}]]
 									 								 [[i0::interrupt <- x__ | x__ <- {|internal__.NID_i0|}]]
 									 								 )
-									 								  [[ share__ <- x__ | x__ <- {| share__,setR_aAreaSearchPoints,setR_aWayPoint |} ]] 
-									 								  [[set_systemDroneOn <- setL_systemDroneOn,set_systemHandheld <- setL_systemHandheld,set_aFlightPlan <- setL_aFlightPlan]]
+									 								  [[ share__ <- x__ | x__ <- {| share__,setR_aWayPoint,setR_aAreaSearchPoints |} ]] 
+									 								  [[set_aFlightPlan <- setL_aFlightPlan,set_systemDroneOn <- setL_systemDroneOn,set_systemHandheld <- setL_systemHandheld]]
 									 								 )
 									 								 [| union(union(union(flowevts,transSync),{terminate}),{|share__
+									 								 			,setL_aFlightPlan
 									 								 			,setL_systemDroneOn
 									 								 			,setL_systemHandheld
-									 								 			,setL_aFlightPlan
-									 								 			,setR_aAreaSearchPoints
-									 								 			 			,setR_aWayPoint
+									 								 			,setR_aWayPoint
+									 								 			 			,setR_aAreaSearchPoints
 									 								 			|}) |]
 									 								 ((i0::enter -> Transitions(id__,
 									 								 		    const_PilotDisplayStm_hToDCommTime))
-									 								  [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn,setL_systemHandheld,setL_aFlightPlan |} ]]
-									 								  [[set_aAreaSearchPoints <- setR_aAreaSearchPoints,set_aWayPoint <- setR_aWayPoint]]
+									 								  [[ share__ <- x__ | x__ <- {| share__,setL_aFlightPlan,setL_systemDroneOn,setL_systemHandheld |} ]]
+									 								  [[set_aWayPoint <- setR_aWayPoint,set_aAreaSearchPoints <- setR_aAreaSearchPoints]]
 									 								 )
-									 								)[[setL_systemDroneOn <- set_systemDroneOn,setL_systemHandheld <- set_systemHandheld,setL_aFlightPlan <- set_aFlightPlan]]
-									 								 [[setR_aAreaSearchPoints <- set_aAreaSearchPoints,setR_aWayPoint <- set_aWayPoint]]
+									 								)[[setL_aFlightPlan <- set_aFlightPlan,setL_systemDroneOn <- set_systemDroneOn,setL_systemHandheld <- set_systemHandheld]]
+									 								 [[setR_aWayPoint <- set_aWayPoint,setR_aAreaSearchPoints <- set_aAreaSearchPoints]]
 									 								)
 									 							)
 									 							 \ hideSet)
@@ -1052,51 +1136,51 @@ module SAR_Handheld
 									 								| x____ <- NIDS
 									 							]]
 									 						)
-									 						[| {|get_CLID_f0,f0::entered,terminate|} |]
-									 						dbisim(Clock_CLID_f0(id__,0,
+									 						[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
+									 						dbisim(Clock_CLID_WaitForInput(id__,0,
 									 								          const_PilotDisplayStm_hToDCommTime))
-									 					)\{|get_CLID_f0|}
+									 					)\{|get_CLID_WaitForInput|}
 									 				)
-									 				[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
-									 				dbisim(Clock_CLID_WaitForInput(id__,0,
+									 				[| {|get_CLID_s0,s0::entered,terminate|} |]
+									 				dbisim(Clock_CLID_s0(id__,0,
 									 						          const_PilotDisplayStm_hToDCommTime))
-									 			)\{|get_CLID_WaitForInput|}
+									 			)\{|get_CLID_s0|}
 									 		)
-									 		[| {|get_CLID_s0,s0::entered,terminate|} |]
-									 		dbisim(Clock_CLID_s0(id__,0,
+									 		[| {|get_CLID_f0,f0::entered,terminate|} |]
+									 		dbisim(Clock_CLID_f0(id__,0,
 									 				          const_PilotDisplayStm_hToDCommTime))
-									 	)\{|get_CLID_s0|}
+									 	)\{|get_CLID_f0|}
 									 )
 									 ))
-									  [[ share__ <- x__ | x__ <- {| share__,setR_adirection,setR_systemDroneOn,setR_aAreaSearchPoints,setR_aHomeCoord,setR_flightPlanFinished,setR_FlightPlan,setR_aWayPoint,setR_aFlightPlan,setR_systemHandheld |} ]] 
-									  [[set_adirection <- setL_adirection,set_systemDroneOn <- setL_systemDroneOn,set_aAreaSearchPoints <- setL_aAreaSearchPoints,set_aHomeCoord <- setL_aHomeCoord,set_flightPlanFinished <- setL_flightPlanFinished,set_FlightPlan <- setL_FlightPlan,set_aWayPoint <- setL_aWayPoint,set_aFlightPlan <- setL_aFlightPlan,set_systemHandheld <- setL_systemHandheld]]
+									  [[ share__ <- x__ | x__ <- {| share__,setR_flightPlanFinished,setR_FlightPlan,setR_aFlightPlan,setR_aWayPoint,setR_systemDroneOn,setR_adirection,setR_aAreaSearchPoints,setR_aHomeCoord,setR_systemHandheld |} ]] 
+									  [[set_flightPlanFinished <- setL_flightPlanFinished,set_FlightPlan <- setL_FlightPlan,set_aFlightPlan <- setL_aFlightPlan,set_aWayPoint <- setL_aWayPoint,set_systemDroneOn <- setL_systemDroneOn,set_adirection <- setL_adirection,set_aAreaSearchPoints <- setL_aAreaSearchPoints,set_aHomeCoord <- setL_aHomeCoord,set_systemHandheld <- setL_systemHandheld]]
 									 )
 									 [| union(union(enteredSS,{| interrupt, terminate |}),{|share__
-									 			,setL_adirection
-									 			,setL_systemDroneOn
-									 			,setL_aAreaSearchPoints
-									 			,setL_aHomeCoord
 									 			,setL_flightPlanFinished
 									 			,setL_FlightPlan
-									 			,setL_aWayPoint
 									 			,setL_aFlightPlan
+									 			,setL_aWayPoint
+									 			,setL_systemDroneOn
+									 			,setL_adirection
+									 			,setL_aAreaSearchPoints
+									 			,setL_aHomeCoord
 									 			,setL_systemHandheld
-									 			,setR_adirection
+									 			,setR_flightPlanFinished
+									 			 			,setR_FlightPlan
+									 			 			,setR_aFlightPlan
+									 			 			,setR_aWayPoint
 									 			 			,setR_systemDroneOn
+									 			 			,setR_adirection
 									 			 			,setR_aAreaSearchPoints
 									 			 			,setR_aHomeCoord
-									 			 			,setR_flightPlanFinished
-									 			 			,setR_FlightPlan
-									 			 			,setR_aWayPoint
-									 			 			,setR_aFlightPlan
 									 			 			,setR_systemHandheld
 									 			|}) |]
 									 ((During)
-									  [[ share__ <- x__ | x__ <- {| share__,setL_adirection,setL_systemDroneOn,setL_aAreaSearchPoints,setL_aHomeCoord,setL_flightPlanFinished,setL_FlightPlan,setL_aWayPoint,setL_aFlightPlan,setL_systemHandheld |} ]]
-									  [[set_adirection <- setR_adirection,set_systemDroneOn <- setR_systemDroneOn,set_aAreaSearchPoints <- setR_aAreaSearchPoints,set_aHomeCoord <- setR_aHomeCoord,set_flightPlanFinished <- setR_flightPlanFinished,set_FlightPlan <- setR_FlightPlan,set_aWayPoint <- setR_aWayPoint,set_aFlightPlan <- setR_aFlightPlan,set_systemHandheld <- setR_systemHandheld]]
+									  [[ share__ <- x__ | x__ <- {| share__,setL_flightPlanFinished,setL_FlightPlan,setL_aFlightPlan,setL_aWayPoint,setL_systemDroneOn,setL_adirection,setL_aAreaSearchPoints,setL_aHomeCoord,setL_systemHandheld |} ]]
+									  [[set_flightPlanFinished <- setR_flightPlanFinished,set_FlightPlan <- setR_FlightPlan,set_aFlightPlan <- setR_aFlightPlan,set_aWayPoint <- setR_aWayPoint,set_systemDroneOn <- setR_systemDroneOn,set_adirection <- setR_adirection,set_aAreaSearchPoints <- setR_aAreaSearchPoints,set_aHomeCoord <- setR_aHomeCoord,set_systemHandheld <- setR_systemHandheld]]
 									 )
-									)[[setL_adirection <- set_adirection,setL_systemDroneOn <- set_systemDroneOn,setL_aAreaSearchPoints <- set_aAreaSearchPoints,setL_aHomeCoord <- set_aHomeCoord,setL_flightPlanFinished <- set_flightPlanFinished,setL_FlightPlan <- set_FlightPlan,setL_aWayPoint <- set_aWayPoint,setL_aFlightPlan <- set_aFlightPlan,setL_systemHandheld <- set_systemHandheld]]
-									 [[setR_adirection <- set_adirection,setR_systemDroneOn <- set_systemDroneOn,setR_aAreaSearchPoints <- set_aAreaSearchPoints,setR_aHomeCoord <- set_aHomeCoord,setR_flightPlanFinished <- set_flightPlanFinished,setR_FlightPlan <- set_FlightPlan,setR_aWayPoint <- set_aWayPoint,setR_aFlightPlan <- set_aFlightPlan,setR_systemHandheld <- set_systemHandheld]]
+									)[[setL_flightPlanFinished <- set_flightPlanFinished,setL_FlightPlan <- set_FlightPlan,setL_aFlightPlan <- set_aFlightPlan,setL_aWayPoint <- set_aWayPoint,setL_systemDroneOn <- set_systemDroneOn,setL_adirection <- set_adirection,setL_aAreaSearchPoints <- set_aAreaSearchPoints,setL_aHomeCoord <- set_aHomeCoord,setL_systemHandheld <- set_systemHandheld]]
+									 [[setR_flightPlanFinished <- set_flightPlanFinished,setR_FlightPlan <- set_FlightPlan,setR_aFlightPlan <- set_aFlightPlan,setR_aWayPoint <- set_aWayPoint,setR_systemDroneOn <- set_systemDroneOn,setR_adirection <- set_adirection,setR_aAreaSearchPoints <- set_aAreaSearchPoints,setR_aHomeCoord <- set_aHomeCoord,setR_systemHandheld <- set_systemHandheld]]
 									)\{terminate} 
 								)
 								During 		= share__choice(([] e__ : enteredSS @ e__ -> SKIP))
@@ -1106,7 +1190,7 @@ module SAR_Handheld
 							
 							Transitions(id__,
 									    const_PilotDisplayStm_hToDCommTime) = ((let
-								Trans = share__choice(get_systemDroneOn?systemDroneOn -> get_systemHandheld?systemHandheld -> get_aFlightPlan?aFlightPlan -> TimeOut_1(
+								Trans = share__choice(get_aFlightPlan?aFlightPlan -> get_systemDroneOn?systemDroneOn -> get_systemHandheld?systemHandheld -> TimeOut_1(
 									 (share__ -> SKIP
 									 [] dbisim(((systemDroneOn and (systemHandheld==SystemPower_On)))&(internal__!NID_s0 -> SKIP ;  share__choice(exit -> SKIP) ; (share__choice(exited -> SKIP) ; SKIP ; WaitForInput::enter -> SKIP)))
 									 [] dbisim((InputAreaCoordinates__!NID_WaitForInput.in?aAreaSearchPoints:{aAreaSearchPoints|aAreaSearchPoints <- AreaCoords, (aFlightPlan==SearchType_AreaSearch)} -> share__choice(set_aAreaSearchPoints!aAreaSearchPoints -> SKIP) ;  share__choice(exit -> SKIP) ; (share__choice(exited -> SKIP) ; share__choice(get_aAreaSearchPoints?aAreaSearchPoints -> true&CALL__FlyToAreaCoordinates(
@@ -1139,6 +1223,18 @@ module SAR_Handheld
 							
 							
 							-- Clocks
+							Clock_CLID_f0(id__,x__,
+									          const_PilotDisplayStm_hToDCommTime) = 
+								TimeOut_1(
+									f0::entered -> Clock_CLID_f0(id__,0,
+											          const_PilotDisplayStm_hToDCommTime)
+									[]
+									get_CLID_f0!x__ -> Clock_CLID_f0(id__,x__,
+											          const_PilotDisplayStm_hToDCommTime)
+									[]
+									terminate -> SKIP,Clock_CLID_f0(id__,clock_type_plus(x__,1,CLID_f0_clock_type(id__,
+											          const_PilotDisplayStm_hToDCommTime)),
+											          const_PilotDisplayStm_hToDCommTime))
 							Clock_CLID_s0(id__,x__,
 									          const_PilotDisplayStm_hToDCommTime) = 
 								TimeOut_1(
@@ -1163,32 +1259,20 @@ module SAR_Handheld
 									terminate -> SKIP,Clock_CLID_WaitForInput(id__,clock_type_plus(x__,1,CLID_WaitForInput_clock_type(id__,
 											          const_PilotDisplayStm_hToDCommTime)),
 											          const_PilotDisplayStm_hToDCommTime))
-							Clock_CLID_f0(id__,x__,
-									          const_PilotDisplayStm_hToDCommTime) = 
-								TimeOut_1(
-									f0::entered -> Clock_CLID_f0(id__,0,
-											          const_PilotDisplayStm_hToDCommTime)
-									[]
-									get_CLID_f0!x__ -> Clock_CLID_f0(id__,x__,
-											          const_PilotDisplayStm_hToDCommTime)
-									[]
-									terminate -> SKIP,Clock_CLID_f0(id__,clock_type_plus(x__,1,CLID_f0_clock_type(id__,
-											          const_PilotDisplayStm_hToDCommTime)),
-											          const_PilotDisplayStm_hToDCommTime))
 							
 							StateClocks(id__,
-									          const_PilotDisplayStm_hToDCommTime) = dbisim(Clock_CLID_s0(id__,0,
+									          const_PilotDisplayStm_hToDCommTime) = dbisim(Clock_CLID_f0(id__,0,
+									          const_PilotDisplayStm_hToDCommTime))
+							[| { terminate } |] (
+							dbisim(Clock_CLID_s0(id__,0,
 									          const_PilotDisplayStm_hToDCommTime))
 							[| { terminate } |] (
 							dbisim(Clock_CLID_WaitForInput(id__,0,
 									          const_PilotDisplayStm_hToDCommTime))
-							[| { terminate } |] (
-							dbisim(Clock_CLID_f0(id__,0,
-									          const_PilotDisplayStm_hToDCommTime))
 							)
 							)
 							
-							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_WaitForInput,WaitForInput::entered,get_CLID_f0,f0::entered|}
+							stateClockSync = {|get_CLID_f0,f0::entered,get_CLID_s0,s0::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						}
 					
 					endmodule
@@ -1286,17 +1370,17 @@ module SAR_Handheld
 					CALL__MoveDrone(id__,
 							    const_PilotDisplayStm_hToDCommTime,
 								param_direction) = EDeadline(MoveDroneCall.param_direction,0)
-					CALL__DroneStopSearch(id__,
-							    const_PilotDisplayStm_hToDCommTime) = EDeadline(DroneStopSearchCall,0)
-					CALL__FlyToCoordinate(id__,
-							    const_PilotDisplayStm_hToDCommTime,
-								param_coord) = EDeadline(FlyToCoordinateCall.param_coord,0)
 					CALL__FlyToAreaCoordinates(id__,
 							    const_PilotDisplayStm_hToDCommTime,
 								param_coords) = EDeadline(FlyToAreaCoordinatesCall.param_coords,0)
 					CALL__FollowPlan(id__,
 							    const_PilotDisplayStm_hToDCommTime,
 								param_searchType) = EDeadline(FollowPlanCall.param_searchType,0)
+					CALL__FlyToCoordinate(id__,
+							    const_PilotDisplayStm_hToDCommTime,
+								param_coord) = EDeadline(FlyToCoordinateCall.param_coord,0)
+					CALL__DroneStopSearch(id__,
+							    const_PilotDisplayStm_hToDCommTime) = EDeadline(DroneStopSearchCall,0)
 					
 					-- END of Operation calls --
 				
@@ -1340,7 +1424,7 @@ module SAR_Handheld
 					-- Transitions
 					Transitions(id__,
 							    const_PilotDisplayStm_hToDCommTime) = ((let
-						Trans = share__choice(get_systemDroneOn?systemDroneOn -> get_flightPlanFinished?flightPlanFinished -> get_systemHandheld?systemHandheld -> TimeOut_1(
+						Trans = share__choice(get_flightPlanFinished?flightPlanFinished -> get_systemDroneOn?systemDroneOn -> get_systemHandheld?systemHandheld -> TimeOut_1(
 							 (share__ -> SKIP
 							 [] dbisim(((systemHandheld==SystemPower_On))&(internal__!NID_s0 -> SKIP ;  share__choice(exit -> SKIP) ; (share__choice(exited -> SKIP) ; SKIP ; WaitForInput::enter -> SKIP)))
 							 [] dbisim((InputFlightPlan__!NID_WaitForInput.in?aFlightPlan:{aFlightPlan|aFlightPlan <- SearchType, systemDroneOn} -> share__choice(set_aFlightPlan!aFlightPlan -> SKIP) ;  share__choice(exit -> SKIP) ; (share__choice(exited -> SKIP) ; share__choice(share__choice(get_aFlightPlan?aFlightPlan -> true & (share__choice(set_FlightPlan!aFlightPlan -> SKIP)))) ; WaitForInput::enter -> SKIP)))
@@ -1414,8 +1498,50 @@ module SAR_Handheld
 									   f0::D__(id__,
 									   		    const_PilotDisplayStm_hToDCommTime)
 									   [| { share__, terminate } |] (
-									   WaitForInput::D__(id__,
-									   		    const_PilotDisplayStm_hToDCommTime)
+									   ((
+									    ((WaitForInput::D__(id__,
+									    		    const_PilotDisplayStm_hToDCommTime))
+									     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									     [[set_systemDroneOn <- setL_systemDroneOn]]
+									    )
+									    [| union({|WaitForInput::entered,WaitForInput::interrupt,terminate|},{|share__
+									    			,setL_systemDroneOn
+									   |}) |]
+									    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									     let
+									     	sTransitionDeadline_t1 =
+									     		let
+									     			Inactive = share__choice(WaitForInput::entered -> Entered)
+									     			
+									     			Entered = Active /\ (WaitForInput::interrupt -> Inactive)
+									     			
+									     			Active =
+									     				(ShareUntilTrue;
+									     				 (ShareUntilFalse /\ (WAIT(6);USTOP)) ;
+									     				 Active
+									     				)
+									     		
+									     			ShareUntilTrue = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(not systemDroneOn)&share__->ShareUntilTrue),ShareUntilTrue))
+									     		
+									     			ShareUntilFalse = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((not systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(systemDroneOn)&share__->ShareUntilFalse),ShareUntilFalse))
+									     		within
+									     			Inactive /\ terminate -> SKIP
+									     within
+									     	[| {WaitForInput::entered, WaitForInput::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t1} @ proc__
+									    )
+									    )
+									     [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn |} ]]
+									    )
+									   )[[setL_systemDroneOn <- set_systemDroneOn]]
+									   )
 									   [| { share__, terminate } |] (
 									   ExecuteFlightPlan::D__(id__,
 									   		    const_PilotDisplayStm_hToDCommTime)
@@ -1433,24 +1559,24 @@ module SAR_Handheld
 									 [[s0::interrupt <- x__ | x__ <- {|interrupt,internal__.NID_s0|}]]
 									 [[i0::interrupt <- x__ | x__ <- {|internal__.NID_i0|}]]
 									 )
-									  [[ share__ <- x__ | x__ <- {| share__,setR_adirection,setR_aHomeCoord,setR_aFlightPlan |} ]] 
-									  [[set_systemDroneOn <- setL_systemDroneOn,set_flightPlanFinished <- setL_flightPlanFinished,set_systemHandheld <- setL_systemHandheld]]
+									  [[ share__ <- x__ | x__ <- {| share__,setR_aFlightPlan,setR_adirection,setR_aHomeCoord |} ]] 
+									  [[set_flightPlanFinished <- setL_flightPlanFinished,set_systemDroneOn <- setL_systemDroneOn,set_systemHandheld <- setL_systemHandheld]]
 									 )
 									 [| union(union(union(flowevts,transSync),{terminate}),{|share__
-									 			,setL_systemDroneOn
 									 			,setL_flightPlanFinished
+									 			,setL_systemDroneOn
 									 			,setL_systemHandheld
-									 			,setR_adirection
+									 			,setR_aFlightPlan
+									 			 			,setR_adirection
 									 			 			,setR_aHomeCoord
-									 			 			,setR_aFlightPlan
 									 			|}) |]
 									 ((i0::enter -> Transitions(id__,
 									 		    const_PilotDisplayStm_hToDCommTime))
-									  [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn,setL_flightPlanFinished,setL_systemHandheld |} ]]
-									  [[set_adirection <- setR_adirection,set_aHomeCoord <- setR_aHomeCoord,set_aFlightPlan <- setR_aFlightPlan]]
+									  [[ share__ <- x__ | x__ <- {| share__,setL_flightPlanFinished,setL_systemDroneOn,setL_systemHandheld |} ]]
+									  [[set_aFlightPlan <- setR_aFlightPlan,set_adirection <- setR_adirection,set_aHomeCoord <- setR_aHomeCoord]]
 									 )
-									)[[setL_systemDroneOn <- set_systemDroneOn,setL_flightPlanFinished <- set_flightPlanFinished,setL_systemHandheld <- set_systemHandheld]]
-									 [[setR_adirection <- set_adirection,setR_aHomeCoord <- set_aHomeCoord,setR_aFlightPlan <- set_aFlightPlan]]
+									)[[setL_flightPlanFinished <- set_flightPlanFinished,setL_systemDroneOn <- set_systemDroneOn,setL_systemHandheld <- set_systemHandheld]]
+									 [[setR_aFlightPlan <- set_aFlightPlan,setR_adirection <- set_adirection,setR_aHomeCoord <- set_aHomeCoord]]
 									)
 								)
 								 \ hideSet)
@@ -1478,7 +1604,7 @@ module SAR_Handheld
 					Behaviour(id__,
 							    const_PilotDisplayStm_hToDCommTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(MachineBody(id__,
 									    const_PilotDisplayStm_hToDCommTime) [| union(stateClockSync,{terminate}) |] StateClocks(id__,
@@ -1489,7 +1615,7 @@ module SAR_Handheld
 					IteratedBehaviour(id__,
 							    const_PilotDisplayStm_hToDCommTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(dbisim(
 								sbisim(
@@ -1499,20 +1625,20 @@ module SAR_Handheld
 												sbisim(
 													MachineBody(id__,
 															    const_PilotDisplayStm_hToDCommTime)
-													[| {|get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,terminate|} |]
-													dbisim(Clock_CLID_ExecuteFlightPlan(id__,0,
+													[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
+													dbisim(Clock_CLID_WaitForInput(id__,0,
 															          const_PilotDisplayStm_hToDCommTime))
-												)\{|get_CLID_ExecuteFlightPlan|}
+												)\{|get_CLID_WaitForInput|}
 											)
-											[| {|get_CLID_s0,s0::entered,terminate|} |]
-											dbisim(Clock_CLID_s0(id__,0,
+											[| {|get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,terminate|} |]
+											dbisim(Clock_CLID_ExecuteFlightPlan(id__,0,
 													          const_PilotDisplayStm_hToDCommTime))
-										)\{|get_CLID_s0|}
+										)\{|get_CLID_ExecuteFlightPlan|}
 									)
-									[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
-									dbisim(Clock_CLID_WaitForInput(id__,0,
+									[| {|get_CLID_s0,s0::entered,terminate|} |]
+									dbisim(Clock_CLID_s0(id__,0,
 											          const_PilotDisplayStm_hToDCommTime))
-								)\{|get_CLID_WaitForInput|}
+								)\{|get_CLID_s0|}
 							)
 							) \ union(stateClockSync,enteredSS)
 						)
@@ -1615,8 +1741,50 @@ module SAR_Handheld
 									   f0::VS_O__(id__,
 									   		    const_PilotDisplayStm_hToDCommTime)
 									   [| { share__, terminate } |] (
-									   WaitForInput::VS_O__(id__,
-									   		    const_PilotDisplayStm_hToDCommTime)
+									   ((
+									    ((WaitForInput::VS_O__(id__,
+									    		    const_PilotDisplayStm_hToDCommTime))
+									     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									     [[set_systemDroneOn <- setL_systemDroneOn]]
+									    )
+									    [| union({|WaitForInput::entered,WaitForInput::interrupt,terminate|},{|share__
+									    			,setL_systemDroneOn
+									   |}) |]
+									    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									     let
+									     	sTransitionDeadline_t1 =
+									     		let
+									     			Inactive = share__choice(WaitForInput::entered -> Entered)
+									     			
+									     			Entered = Active /\ (WaitForInput::interrupt -> Inactive)
+									     			
+									     			Active =
+									     				(ShareUntilTrue;
+									     				 (ShareUntilFalse /\ (WAIT(6);USTOP)) ;
+									     				 Active
+									     				)
+									     		
+									     			ShareUntilTrue = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(not systemDroneOn)&share__->ShareUntilTrue),ShareUntilTrue))
+									     		
+									     			ShareUntilFalse = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((not systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(systemDroneOn)&share__->ShareUntilFalse),ShareUntilFalse))
+									     		within
+									     			Inactive /\ terminate -> SKIP
+									     within
+									     	[| {WaitForInput::entered, WaitForInput::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t1} @ proc__
+									    )
+									    )
+									     [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn |} ]]
+									    )
+									   )[[setL_systemDroneOn <- set_systemDroneOn]]
+									   )
 									   [| { share__, terminate } |] (
 									   ExecuteFlightPlan::VS_O__(id__,
 									   		    const_PilotDisplayStm_hToDCommTime)
@@ -1634,24 +1802,24 @@ module SAR_Handheld
 									 [[s0::interrupt <- x__ | x__ <- {|interrupt,internal__.NID_s0|}]]
 									 [[i0::interrupt <- x__ | x__ <- {|internal__.NID_i0|}]]
 									 )
-									  [[ share__ <- x__ | x__ <- {| share__,setR_adirection,setR_aHomeCoord,setR_aFlightPlan |} ]] 
-									  [[set_systemDroneOn <- setL_systemDroneOn,set_flightPlanFinished <- setL_flightPlanFinished,set_systemHandheld <- setL_systemHandheld]]
+									  [[ share__ <- x__ | x__ <- {| share__,setR_aFlightPlan,setR_adirection,setR_aHomeCoord |} ]] 
+									  [[set_flightPlanFinished <- setL_flightPlanFinished,set_systemDroneOn <- setL_systemDroneOn,set_systemHandheld <- setL_systemHandheld]]
 									 )
 									 [| union(union(union(flowevts,transSync),{terminate}),{|share__
-									 			,setL_systemDroneOn
 									 			,setL_flightPlanFinished
+									 			,setL_systemDroneOn
 									 			,setL_systemHandheld
-									 			,setR_adirection
+									 			,setR_aFlightPlan
+									 			 			,setR_adirection
 									 			 			,setR_aHomeCoord
-									 			 			,setR_aFlightPlan
 									 			|}) |]
 									 ((i0::enter -> Transitions(id__,
 									 		    const_PilotDisplayStm_hToDCommTime))
-									  [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn,setL_flightPlanFinished,setL_systemHandheld |} ]]
-									  [[set_adirection <- setR_adirection,set_aHomeCoord <- setR_aHomeCoord,set_aFlightPlan <- setR_aFlightPlan]]
+									  [[ share__ <- x__ | x__ <- {| share__,setL_flightPlanFinished,setL_systemDroneOn,setL_systemHandheld |} ]]
+									  [[set_aFlightPlan <- setR_aFlightPlan,set_adirection <- setR_adirection,set_aHomeCoord <- setR_aHomeCoord]]
 									 )
-									)[[setL_systemDroneOn <- set_systemDroneOn,setL_flightPlanFinished <- set_flightPlanFinished,setL_systemHandheld <- set_systemHandheld]]
-									 [[setR_adirection <- set_adirection,setR_aHomeCoord <- set_aHomeCoord,setR_aFlightPlan <- set_aFlightPlan]]
+									)[[setL_flightPlanFinished <- set_flightPlanFinished,setL_systemDroneOn <- set_systemDroneOn,setL_systemHandheld <- set_systemHandheld]]
+									 [[setR_aFlightPlan <- set_aFlightPlan,setR_adirection <- set_adirection,setR_aHomeCoord <- set_aHomeCoord]]
 									)
 								)
 								 \ hideSet)
@@ -1679,7 +1847,7 @@ module SAR_Handheld
 					Behaviour_VS_O(id__,
 							    const_PilotDisplayStm_hToDCommTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(MachineBody_VS_O(id__,
 									    const_PilotDisplayStm_hToDCommTime) [| union(stateClockSync,{terminate}) |] StateClocks(id__,
@@ -1690,7 +1858,7 @@ module SAR_Handheld
 					IteratedBehaviour_VS_O(id__,
 							    const_PilotDisplayStm_hToDCommTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(dbisim(
 								sbisim(
@@ -1700,20 +1868,20 @@ module SAR_Handheld
 												sbisim(
 													MachineBody_VS_O(id__,
 															    const_PilotDisplayStm_hToDCommTime)
-													[| {|get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,terminate|} |]
-													dbisim(Clock_CLID_ExecuteFlightPlan(id__,0,
+													[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
+													dbisim(Clock_CLID_WaitForInput(id__,0,
 															          const_PilotDisplayStm_hToDCommTime))
-												)\{|get_CLID_ExecuteFlightPlan|}
+												)\{|get_CLID_WaitForInput|}
 											)
-											[| {|get_CLID_s0,s0::entered,terminate|} |]
-											dbisim(Clock_CLID_s0(id__,0,
+											[| {|get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,terminate|} |]
+											dbisim(Clock_CLID_ExecuteFlightPlan(id__,0,
 													          const_PilotDisplayStm_hToDCommTime))
-										)\{|get_CLID_s0|}
+										)\{|get_CLID_ExecuteFlightPlan|}
 									)
-									[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
-									dbisim(Clock_CLID_WaitForInput(id__,0,
+									[| {|get_CLID_s0,s0::entered,terminate|} |]
+									dbisim(Clock_CLID_s0(id__,0,
 											          const_PilotDisplayStm_hToDCommTime))
-								)\{|get_CLID_WaitForInput|}
+								)\{|get_CLID_s0|}
 							)
 							) \ diff(union(stateClockSync,enteredSS),enteredSS)
 						)
@@ -1877,18 +2045,6 @@ module SAR_Handheld
 					
 					clockSync = {||}
 					
-					Clock_CLID_WaitForInput(id__,x__,
-							          const_PilotDisplayStm_hToDCommTime) = 
-						TimeOut_1(
-							WaitForInput::entered -> Clock_CLID_WaitForInput(id__,0,
-									          const_PilotDisplayStm_hToDCommTime)
-							[]
-							get_CLID_WaitForInput!x__ -> Clock_CLID_WaitForInput(id__,x__,
-									          const_PilotDisplayStm_hToDCommTime)
-							[]
-							terminate -> SKIP,Clock_CLID_WaitForInput(id__,clock_type_plus(x__,1,CLID_WaitForInput_clock_type(id__,
-									          const_PilotDisplayStm_hToDCommTime)),
-									          const_PilotDisplayStm_hToDCommTime))
 					Clock_CLID_s0(id__,x__,
 							          const_PilotDisplayStm_hToDCommTime) = 
 						TimeOut_1(
@@ -1913,20 +2069,32 @@ module SAR_Handheld
 							terminate -> SKIP,Clock_CLID_ExecuteFlightPlan(id__,clock_type_plus(x__,1,CLID_ExecuteFlightPlan_clock_type(id__,
 									          const_PilotDisplayStm_hToDCommTime)),
 									          const_PilotDisplayStm_hToDCommTime))
+					Clock_CLID_WaitForInput(id__,x__,
+							          const_PilotDisplayStm_hToDCommTime) = 
+						TimeOut_1(
+							WaitForInput::entered -> Clock_CLID_WaitForInput(id__,0,
+									          const_PilotDisplayStm_hToDCommTime)
+							[]
+							get_CLID_WaitForInput!x__ -> Clock_CLID_WaitForInput(id__,x__,
+									          const_PilotDisplayStm_hToDCommTime)
+							[]
+							terminate -> SKIP,Clock_CLID_WaitForInput(id__,clock_type_plus(x__,1,CLID_WaitForInput_clock_type(id__,
+									          const_PilotDisplayStm_hToDCommTime)),
+									          const_PilotDisplayStm_hToDCommTime))
 					
 					StateClocks(id__,
-							          const_PilotDisplayStm_hToDCommTime) = dbisim(Clock_CLID_WaitForInput(id__,0,
-							          const_PilotDisplayStm_hToDCommTime))
-					[| { terminate } |] (
-					dbisim(Clock_CLID_s0(id__,0,
+							          const_PilotDisplayStm_hToDCommTime) = dbisim(Clock_CLID_s0(id__,0,
 							          const_PilotDisplayStm_hToDCommTime))
 					[| { terminate } |] (
 					dbisim(Clock_CLID_ExecuteFlightPlan(id__,0,
 							          const_PilotDisplayStm_hToDCommTime))
+					[| { terminate } |] (
+					dbisim(Clock_CLID_WaitForInput(id__,0,
+							          const_PilotDisplayStm_hToDCommTime))
 					)
 					)
 					
-					stateClockSync = {|get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered|}
+					stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_ExecuteFlightPlan,ExecuteFlightPlan::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 					
 					-- Shared memory
 					-- Shared memory variables
@@ -1973,19 +2141,19 @@ module SAR_Handheld
 			
 			Timed(OneStep) {
 					-- undefined operations
-					CALL__OnOffDrone(id__) 	= OnOffDroneCall -> SKIP
 					CALL__MoveDrone(id__,
 							    param_direction) 	= MoveDroneCall.param_direction -> SKIP
-					CALL__DroneStopSearch(id__) 	= DroneStopSearchCall -> SKIP
-					CALL__FlyToCoordinate(id__,
-							    param_coord) 	= FlyToCoordinateCall.param_coord -> SKIP
 					CALL__FlyToAreaCoordinates(id__,
 							    param_coords) 	= FlyToAreaCoordinatesCall.param_coords -> SKIP
-					CALL__FollowPlan(id__,
-							    param_searchType) 	= FollowPlanCall.param_searchType -> SKIP
+					CALL__OnOffDrone(id__) 	= OnOffDroneCall -> SKIP
 					CALL__stopHandheldOperating(id__,
 							    param_forceQuit,
 							    param_dronePowerTime) 	= stopHandheldOperatingCall.param_forceQuit.param_dronePowerTime -> SKIP
+					CALL__FollowPlan(id__,
+							    param_searchType) 	= FollowPlanCall.param_searchType -> SKIP
+					CALL__FlyToCoordinate(id__,
+							    param_coord) 	= FlyToCoordinateCall.param_coord -> SKIP
+					CALL__DroneStopSearch(id__) 	= DroneStopSearchCall -> SKIP
 					
 					-- declaring controller memory
 					Memory(id__, systemDroneOn, systemHandheld, FlightPlan) = (
@@ -2022,10 +2190,10 @@ module SAR_Handheld
 								stm_ref0::set_FlightPlan <- set_FlightPlan,
 								stm_ref0::get_FlightPlan <- get_FlightPlan,
 								stm_ref0::MoveDroneCall <- MoveDroneCall,
-								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 								stm_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
-								stm_ref0::FollowPlanCall <- FollowPlanCall
+								stm_ref0::FollowPlanCall <- FollowPlanCall,
+								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall
 							]]
 						)
 							[|
@@ -2073,10 +2241,10 @@ module SAR_Handheld
 								stm_ref0::set_FlightPlan <- set_FlightPlan,
 								stm_ref0::get_FlightPlan <- get_FlightPlan,
 								stm_ref0::MoveDroneCall <- MoveDroneCall,
-								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 								stm_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
-								stm_ref0::FollowPlanCall <- FollowPlanCall
+								stm_ref0::FollowPlanCall <- FollowPlanCall,
+								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall
 							]]
 						)
 							[|
@@ -2124,10 +2292,10 @@ module SAR_Handheld
 								stm_ref0::set_FlightPlan <- set_FlightPlan,
 								stm_ref0::get_FlightPlan <- get_FlightPlan,
 								stm_ref0::MoveDroneCall <- MoveDroneCall,
-								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 								stm_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
-								stm_ref0::FollowPlanCall <- FollowPlanCall
+								stm_ref0::FollowPlanCall <- FollowPlanCall,
+								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall
 							]]
 						)
 							[|
@@ -2175,10 +2343,10 @@ module SAR_Handheld
 								stm_ref0::set_FlightPlan <- set_FlightPlan,
 								stm_ref0::get_FlightPlan <- get_FlightPlan,
 								stm_ref0::MoveDroneCall <- MoveDroneCall,
-								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 								stm_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
-								stm_ref0::FollowPlanCall <- FollowPlanCall
+								stm_ref0::FollowPlanCall <- FollowPlanCall,
+								stm_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+								stm_ref0::DroneStopSearchCall <- DroneStopSearchCall
 							]]
 						)
 							[|
@@ -2840,12 +3008,12 @@ module SAR_Handheld
 				localClockResets = {||}
 				
 				
-				channel get_CLID_HandheldOperating : core_clock_type 
 				channel get_CLID_f0 : core_clock_type 
+				channel get_CLID_HandheldOperating : core_clock_type 
 				channel get_CLID_Off : core_clock_type 
 				--channel increment__
 				
-				CLID_HandheldOperating_clock_type(id__,
+				CLID_f0_clock_type(id__,
 						          const_SystemSW_startTime,
 						          const_SystemSW_dronePowerTime) = 
 					let
@@ -2855,7 +3023,7 @@ module SAR_Handheld
 				within
 					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 				
-				CLID_f0_clock_type(id__,
+				CLID_HandheldOperating_clock_type(id__,
 						          const_SystemSW_startTime,
 						          const_SystemSW_dronePowerTime) = 
 					let
@@ -2986,7 +3154,7 @@ module SAR_Handheld
 								
 								Termination = terminate -> SKIP
 								
-								Active 		= share__choice(true & (share__choice(set_systemHandheld!SystemPower_Off -> SKIP))) ; 
+								Active 		= SHARE_WAIT(const_SystemSW_startTime);share__choice(true & (share__choice(set_systemHandheld!SystemPower_Off -> SKIP))) ; 
 										 	  Behaviour ; 
 										 	  share__choice(exit -> SKIP) ; SKIP ; 
 										 	  share__choice(exited -> SKIP) ; Inactive
@@ -3004,7 +3172,7 @@ module SAR_Handheld
 								
 								Termination = terminate -> SKIP
 								
-								Active 		= share__choice(true & (share__choice(set_systemHandheld!SystemPower_Off -> SKIP))) ; 
+								Active 		= SHARE_WAIT(const_SystemSW_startTime);share__choice(true & (share__choice(set_systemHandheld!SystemPower_Off -> SKIP))) ; 
 										 	  Behaviour ; 
 										 	  share__choice(exit -> SKIP) ; SKIP ; 
 										 	  share__choice(exited -> SKIP) ; Inactive
@@ -3343,9 +3511,49 @@ module SAR_Handheld
 									 						   		    const_SystemSW_startTime,
 									 						   		    const_SystemSW_dronePowerTime)
 									 						   [| { share__, terminate } |] (
-									 						   DisplayDroneControls::D__(id__,
-									 						   		    const_SystemSW_startTime,
-									 						   		    const_SystemSW_dronePowerTime)
+									 						   ((
+									 						    ((DisplayDroneControls::D__(id__,
+									 						    		    const_SystemSW_startTime,
+									 						    		    const_SystemSW_dronePowerTime))
+									 						     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									 						    )
+									 						    [| union({|DisplayDroneControls::entered,DisplayDroneControls::interrupt,terminate|},{|share__
+									 						   |}) |]
+									 						    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									 						     let
+									 						     	sTransitionDeadline_t1 =
+									 						     		let
+									 						     			Inactive = share__choice(DisplayDroneControls::entered -> Entered)
+									 						     			
+									 						     			Entered = Active /\ (DisplayDroneControls::interrupt -> Inactive)
+									 						     			
+									 						     			Active =
+									 						     				(ShareUntilTrue;
+									 						     				 (ShareUntilFalse /\ (WAIT(2);USTOP)) ;
+									 						     				 Active
+									 						     				)
+									 						     		
+									 						     			ShareUntilTrue = 
+									 						     				TimeOut_1(
+									 						     					((true)&SKIP
+									 						     				 	[]
+									 						     				 	(not true)&share__->ShareUntilTrue),ShareUntilTrue)
+									 						     		
+									 						     			ShareUntilFalse = 
+									 						     				TimeOut_1(
+									 						     					((not true)&SKIP
+									 						     				 	[]
+									 						     				 	(true)&share__->ShareUntilFalse),ShareUntilFalse)
+									 						     		within
+									 						     			Inactive /\ terminate -> SKIP
+									 						     within
+									 						     	[| {DisplayDroneControls::entered, DisplayDroneControls::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t1} @ proc__
+									 						    )
+									 						    )
+									 						     [[ share__ <- x__ | x__ <- {| share__ |} ]]
+									 						    )
+									 						   )
+									 						   )
 									 						   [| { share__, terminate } |] (
 									 						   DroneOperating::D__(id__,
 									 						   		    const_SystemSW_startTime,
@@ -3462,9 +3670,49 @@ module SAR_Handheld
 									 						   		    const_SystemSW_startTime,
 									 						   		    const_SystemSW_dronePowerTime)
 									 						   [| { share__, terminate } |] (
-									 						   DisplayDroneControls::VS_O__(id__,
-									 						   		    const_SystemSW_startTime,
-									 						   		    const_SystemSW_dronePowerTime)
+									 						   ((
+									 						    ((DisplayDroneControls::VS_O__(id__,
+									 						    		    const_SystemSW_startTime,
+									 						    		    const_SystemSW_dronePowerTime))
+									 						     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									 						    )
+									 						    [| union({|DisplayDroneControls::entered,DisplayDroneControls::interrupt,terminate|},{|share__
+									 						   |}) |]
+									 						    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									 						     let
+									 						     	sTransitionDeadline_t1 =
+									 						     		let
+									 						     			Inactive = share__choice(DisplayDroneControls::entered -> Entered)
+									 						     			
+									 						     			Entered = Active /\ (DisplayDroneControls::interrupt -> Inactive)
+									 						     			
+									 						     			Active =
+									 						     				(ShareUntilTrue;
+									 						     				 (ShareUntilFalse /\ (WAIT(2);USTOP)) ;
+									 						     				 Active
+									 						     				)
+									 						     		
+									 						     			ShareUntilTrue = 
+									 						     				TimeOut_1(
+									 						     					((true)&SKIP
+									 						     				 	[]
+									 						     				 	(not true)&share__->ShareUntilTrue),ShareUntilTrue)
+									 						     		
+									 						     			ShareUntilFalse = 
+									 						     				TimeOut_1(
+									 						     					((not true)&SKIP
+									 						     				 	[]
+									 						     				 	(true)&share__->ShareUntilFalse),ShareUntilFalse)
+									 						     		within
+									 						     			Inactive /\ terminate -> SKIP
+									 						     within
+									 						     	[| {DisplayDroneControls::entered, DisplayDroneControls::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t1} @ proc__
+									 						    )
+									 						    )
+									 						     [[ share__ <- x__ | x__ <- {| share__ |} ]]
+									 						    )
+									 						   )
+									 						   )
 									 						   [| { share__, terminate } |] (
 									 						   DroneOperating::VS_O__(id__,
 									 						   		    const_SystemSW_startTime,
@@ -4500,11 +4748,22 @@ module SAR_Handheld
 				localClockResets = {||}
 				
 				
+				channel get_CLID_s0 : core_clock_type 
 				channel get_CLID_WaitForBatteryStatus : core_clock_type 
 				channel get_CLID_WaitForInput : core_clock_type 
 				channel get_CLID_f0 : core_clock_type 
-				channel get_CLID_s0 : core_clock_type 
 				--channel increment__
+				
+				CLID_s0_clock_type(id__,
+						          const_BatteryStatusStm_hToDCommTime,
+						          const_BatteryStatusStm_batteryCallWaitTime) = 
+					let
+						max = (clock_type_max(Union({
+				{}
+				}))+1)
+					ctype = {0..max}
+				within
+					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 				
 				CLID_WaitForBatteryStatus_clock_type(id__,
 						          const_BatteryStatusStm_hToDCommTime,
@@ -4529,17 +4788,6 @@ module SAR_Handheld
 					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
 				
 				CLID_f0_clock_type(id__,
-						          const_BatteryStatusStm_hToDCommTime,
-						          const_BatteryStatusStm_batteryCallWaitTime) = 
-					let
-						max = (clock_type_max(Union({
-				{}
-				}))+1)
-					ctype = {0..max}
-				within
-					if member(max,core_clock_type) then ctype else error("core_clock_type is not wide enough")
-				
-				CLID_s0_clock_type(id__,
 						          const_BatteryStatusStm_hToDCommTime,
 						          const_BatteryStatusStm_batteryCallWaitTime) = 
 					let
@@ -5012,9 +5260,51 @@ module SAR_Handheld
 									   		    const_BatteryStatusStm_hToDCommTime,
 									   		    const_BatteryStatusStm_batteryCallWaitTime)
 									   [| { share__, terminate } |] (
-									   WaitForBatteryStatus::D__(id__,
-									   		    const_BatteryStatusStm_hToDCommTime,
-									   		    const_BatteryStatusStm_batteryCallWaitTime)
+									   ((
+									    ((WaitForBatteryStatus::D__(id__,
+									    		    const_BatteryStatusStm_hToDCommTime,
+									    		    const_BatteryStatusStm_batteryCallWaitTime))
+									     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									     [[set_systemDroneOn <- setL_systemDroneOn]]
+									    )
+									    [| union({|WaitForBatteryStatus::entered,WaitForBatteryStatus::interrupt,terminate|},{|share__
+									    			,setL_systemDroneOn
+									   |}) |]
+									    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									     let
+									     	sTransitionDeadline_t10 =
+									     		let
+									     			Inactive = share__choice(WaitForBatteryStatus::entered -> Entered)
+									     			
+									     			Entered = Active /\ (WaitForBatteryStatus::interrupt -> Inactive)
+									     			
+									     			Active =
+									     				(ShareUntilTrue;
+									     				 (ShareUntilFalse /\ (WAIT(2);USTOP)) ;
+									     				 Active
+									     				)
+									     		
+									     			ShareUntilTrue = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(not systemDroneOn)&share__->ShareUntilTrue),ShareUntilTrue))
+									     		
+									     			ShareUntilFalse = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((not systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(systemDroneOn)&share__->ShareUntilFalse),ShareUntilFalse))
+									     		within
+									     			Inactive /\ terminate -> SKIP
+									     within
+									     	[| {WaitForBatteryStatus::entered, WaitForBatteryStatus::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t10} @ proc__
+									    )
+									    )
+									     [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn |} ]]
+									    )
+									   )[[setL_systemDroneOn <- set_systemDroneOn]]
+									   )
 									   )
 									   )
 									   )
@@ -5065,7 +5355,7 @@ module SAR_Handheld
 							    const_BatteryStatusStm_hToDCommTime,
 							    const_BatteryStatusStm_batteryCallWaitTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(MachineBody(id__,
 									    const_BatteryStatusStm_hToDCommTime,
@@ -5079,7 +5369,7 @@ module SAR_Handheld
 							    const_BatteryStatusStm_hToDCommTime,
 							    const_BatteryStatusStm_batteryCallWaitTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(dbisim(
 								sbisim(
@@ -5090,23 +5380,23 @@ module SAR_Handheld
 													MachineBody(id__,
 															    const_BatteryStatusStm_hToDCommTime,
 															    const_BatteryStatusStm_batteryCallWaitTime)
-													[| {|get_CLID_s0,s0::entered,terminate|} |]
-													dbisim(Clock_CLID_s0(id__,0,
+													[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
+													dbisim(Clock_CLID_WaitForInput(id__,0,
 															          const_BatteryStatusStm_hToDCommTime,
 															          const_BatteryStatusStm_batteryCallWaitTime))
-												)\{|get_CLID_s0|}
+												)\{|get_CLID_WaitForInput|}
 											)
-											[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
-											dbisim(Clock_CLID_WaitForInput(id__,0,
+											[| {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,terminate|} |]
+											dbisim(Clock_CLID_WaitForBatteryStatus(id__,0,
 													          const_BatteryStatusStm_hToDCommTime,
 													          const_BatteryStatusStm_batteryCallWaitTime))
-										)\{|get_CLID_WaitForInput|}
+										)\{|get_CLID_WaitForBatteryStatus|}
 									)
-									[| {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,terminate|} |]
-									dbisim(Clock_CLID_WaitForBatteryStatus(id__,0,
+									[| {|get_CLID_s0,s0::entered,terminate|} |]
+									dbisim(Clock_CLID_s0(id__,0,
 											          const_BatteryStatusStm_hToDCommTime,
 											          const_BatteryStatusStm_batteryCallWaitTime))
-								)\{|get_CLID_WaitForBatteryStatus|}
+								)\{|get_CLID_s0|}
 							)
 							) \ union(stateClockSync,enteredSS)
 						)
@@ -5191,9 +5481,51 @@ module SAR_Handheld
 									   		    const_BatteryStatusStm_hToDCommTime,
 									   		    const_BatteryStatusStm_batteryCallWaitTime)
 									   [| { share__, terminate } |] (
-									   WaitForBatteryStatus::VS_O__(id__,
-									   		    const_BatteryStatusStm_hToDCommTime,
-									   		    const_BatteryStatusStm_batteryCallWaitTime)
+									   ((
+									    ((WaitForBatteryStatus::VS_O__(id__,
+									    		    const_BatteryStatusStm_hToDCommTime,
+									    		    const_BatteryStatusStm_batteryCallWaitTime))
+									     [[ share__ <- x__ | x__ <- {| share__ |} ]] 
+									     [[set_systemDroneOn <- setL_systemDroneOn]]
+									    )
+									    [| union({|WaitForBatteryStatus::entered,WaitForBatteryStatus::interrupt,terminate|},{|share__
+									    			,setL_systemDroneOn
+									   |}) |]
+									    (((-- RULE stateDeadlines(n:State, ts:Set<Transitions>) : TimedCSPProcess
+									     let
+									     	sTransitionDeadline_t10 =
+									     		let
+									     			Inactive = share__choice(WaitForBatteryStatus::entered -> Entered)
+									     			
+									     			Entered = Active /\ (WaitForBatteryStatus::interrupt -> Inactive)
+									     			
+									     			Active =
+									     				(ShareUntilTrue;
+									     				 (ShareUntilFalse /\ (WAIT(2);USTOP)) ;
+									     				 Active
+									     				)
+									     		
+									     			ShareUntilTrue = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(not systemDroneOn)&share__->ShareUntilTrue),ShareUntilTrue))
+									     		
+									     			ShareUntilFalse = 
+									     				share__choice(get_systemDroneOn?systemDroneOn -> TimeOut_1(
+									     					((not systemDroneOn)&SKIP
+									     				 	[]
+									     				 	(systemDroneOn)&share__->ShareUntilFalse),ShareUntilFalse))
+									     		within
+									     			Inactive /\ terminate -> SKIP
+									     within
+									     	[| {WaitForBatteryStatus::entered, WaitForBatteryStatus::interrupt, share__, terminate} |] proc__ : {sTransitionDeadline_t10} @ proc__
+									    )
+									    )
+									     [[ share__ <- x__ | x__ <- {| share__,setL_systemDroneOn |} ]]
+									    )
+									   )[[setL_systemDroneOn <- set_systemDroneOn]]
+									   )
 									   )
 									   )
 									   )
@@ -5244,7 +5576,7 @@ module SAR_Handheld
 							    const_BatteryStatusStm_hToDCommTime,
 							    const_BatteryStatusStm_batteryCallWaitTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(MachineBody_VS_O(id__,
 									    const_BatteryStatusStm_hToDCommTime,
@@ -5258,7 +5590,7 @@ module SAR_Handheld
 							    const_BatteryStatusStm_hToDCommTime,
 							    const_BatteryStatusStm_batteryCallWaitTime) = 
 						dbisim((let
-							stateClockSync = {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered|}
+							stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 						 within
 							(dbisim(
 								sbisim(
@@ -5269,23 +5601,23 @@ module SAR_Handheld
 													MachineBody_VS_O(id__,
 															    const_BatteryStatusStm_hToDCommTime,
 															    const_BatteryStatusStm_batteryCallWaitTime)
-													[| {|get_CLID_s0,s0::entered,terminate|} |]
-													dbisim(Clock_CLID_s0(id__,0,
+													[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
+													dbisim(Clock_CLID_WaitForInput(id__,0,
 															          const_BatteryStatusStm_hToDCommTime,
 															          const_BatteryStatusStm_batteryCallWaitTime))
-												)\{|get_CLID_s0|}
+												)\{|get_CLID_WaitForInput|}
 											)
-											[| {|get_CLID_WaitForInput,WaitForInput::entered,terminate|} |]
-											dbisim(Clock_CLID_WaitForInput(id__,0,
+											[| {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,terminate|} |]
+											dbisim(Clock_CLID_WaitForBatteryStatus(id__,0,
 													          const_BatteryStatusStm_hToDCommTime,
 													          const_BatteryStatusStm_batteryCallWaitTime))
-										)\{|get_CLID_WaitForInput|}
+										)\{|get_CLID_WaitForBatteryStatus|}
 									)
-									[| {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,terminate|} |]
-									dbisim(Clock_CLID_WaitForBatteryStatus(id__,0,
+									[| {|get_CLID_s0,s0::entered,terminate|} |]
+									dbisim(Clock_CLID_s0(id__,0,
 											          const_BatteryStatusStm_hToDCommTime,
 											          const_BatteryStatusStm_batteryCallWaitTime))
-								)\{|get_CLID_WaitForBatteryStatus|}
+								)\{|get_CLID_s0|}
 							)
 							) \ diff(union(stateClockSync,enteredSS),enteredSS)
 						)
@@ -5393,6 +5725,23 @@ module SAR_Handheld
 					
 					clockSync = {||}
 					
+					Clock_CLID_s0(id__,x__,
+							          const_BatteryStatusStm_hToDCommTime,
+							          const_BatteryStatusStm_batteryCallWaitTime) = 
+						TimeOut_1(
+							s0::entered -> Clock_CLID_s0(id__,0,
+									          const_BatteryStatusStm_hToDCommTime,
+									          const_BatteryStatusStm_batteryCallWaitTime)
+							[]
+							get_CLID_s0!x__ -> Clock_CLID_s0(id__,x__,
+									          const_BatteryStatusStm_hToDCommTime,
+									          const_BatteryStatusStm_batteryCallWaitTime)
+							[]
+							terminate -> SKIP,Clock_CLID_s0(id__,clock_type_plus(x__,1,CLID_s0_clock_type(id__,
+									          const_BatteryStatusStm_hToDCommTime,
+									          const_BatteryStatusStm_batteryCallWaitTime)),
+									          const_BatteryStatusStm_hToDCommTime,
+									          const_BatteryStatusStm_batteryCallWaitTime))
 					Clock_CLID_WaitForBatteryStatus(id__,x__,
 							          const_BatteryStatusStm_hToDCommTime,
 							          const_BatteryStatusStm_batteryCallWaitTime) = 
@@ -5427,41 +5776,24 @@ module SAR_Handheld
 									          const_BatteryStatusStm_batteryCallWaitTime)),
 									          const_BatteryStatusStm_hToDCommTime,
 									          const_BatteryStatusStm_batteryCallWaitTime))
-					Clock_CLID_s0(id__,x__,
-							          const_BatteryStatusStm_hToDCommTime,
-							          const_BatteryStatusStm_batteryCallWaitTime) = 
-						TimeOut_1(
-							s0::entered -> Clock_CLID_s0(id__,0,
-									          const_BatteryStatusStm_hToDCommTime,
-									          const_BatteryStatusStm_batteryCallWaitTime)
-							[]
-							get_CLID_s0!x__ -> Clock_CLID_s0(id__,x__,
-									          const_BatteryStatusStm_hToDCommTime,
-									          const_BatteryStatusStm_batteryCallWaitTime)
-							[]
-							terminate -> SKIP,Clock_CLID_s0(id__,clock_type_plus(x__,1,CLID_s0_clock_type(id__,
-									          const_BatteryStatusStm_hToDCommTime,
-									          const_BatteryStatusStm_batteryCallWaitTime)),
-									          const_BatteryStatusStm_hToDCommTime,
-									          const_BatteryStatusStm_batteryCallWaitTime))
 					
 					StateClocks(id__,
 							          const_BatteryStatusStm_hToDCommTime,
-							          const_BatteryStatusStm_batteryCallWaitTime) = dbisim(Clock_CLID_WaitForBatteryStatus(id__,0,
+							          const_BatteryStatusStm_batteryCallWaitTime) = dbisim(Clock_CLID_s0(id__,0,
+							          const_BatteryStatusStm_hToDCommTime,
+							          const_BatteryStatusStm_batteryCallWaitTime))
+					[| { terminate } |] (
+					dbisim(Clock_CLID_WaitForBatteryStatus(id__,0,
 							          const_BatteryStatusStm_hToDCommTime,
 							          const_BatteryStatusStm_batteryCallWaitTime))
 					[| { terminate } |] (
 					dbisim(Clock_CLID_WaitForInput(id__,0,
 							          const_BatteryStatusStm_hToDCommTime,
 							          const_BatteryStatusStm_batteryCallWaitTime))
-					[| { terminate } |] (
-					dbisim(Clock_CLID_s0(id__,0,
-							          const_BatteryStatusStm_hToDCommTime,
-							          const_BatteryStatusStm_batteryCallWaitTime))
 					)
 					)
 					
-					stateClockSync = {|get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered,get_CLID_s0,s0::entered|}
+					stateClockSync = {|get_CLID_s0,s0::entered,get_CLID_WaitForBatteryStatus,WaitForBatteryStatus::entered,get_CLID_WaitForInput,WaitForInput::entered|}
 					
 					-- Shared memory
 					-- Shared memory variables
@@ -5742,13 +6074,13 @@ module SAR_Handheld
 									ctrl_ref0::get_systemHandheld <- get_systemHandheld,
 									ctrl_ref0::set_FlightPlan <- set_FlightPlan,
 									ctrl_ref0::get_FlightPlan <- get_FlightPlan,
-									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
 									ctrl_ref0::MoveDroneCall <- MoveDroneCall,
-									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 									ctrl_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
+									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
+									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall,
 									ctrl_ref0::FollowPlanCall <- FollowPlanCall,
-									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall
+									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall
 								]]
 							)
 								[|{|terminate|}|]
@@ -5863,13 +6195,13 @@ module SAR_Handheld
 									ctrl_ref0::get_systemHandheld <- get_systemHandheld,
 									ctrl_ref0::set_FlightPlan <- set_FlightPlan,
 									ctrl_ref0::get_FlightPlan <- get_FlightPlan,
-									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
 									ctrl_ref0::MoveDroneCall <- MoveDroneCall,
-									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 									ctrl_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
+									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
+									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall,
 									ctrl_ref0::FollowPlanCall <- FollowPlanCall,
-									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall
+									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall
 								]]
 							)
 								[|{|terminate|}|]
@@ -5984,13 +6316,13 @@ module SAR_Handheld
 									ctrl_ref0::get_systemHandheld <- get_systemHandheld,
 									ctrl_ref0::set_FlightPlan <- set_FlightPlan,
 									ctrl_ref0::get_FlightPlan <- get_FlightPlan,
-									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
 									ctrl_ref0::MoveDroneCall <- MoveDroneCall,
-									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 									ctrl_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
+									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
+									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall,
 									ctrl_ref0::FollowPlanCall <- FollowPlanCall,
-									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall
+									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall
 								]]
 							)
 								[|{|terminate|}|]
@@ -6105,13 +6437,13 @@ module SAR_Handheld
 									ctrl_ref0::get_systemHandheld <- get_systemHandheld,
 									ctrl_ref0::set_FlightPlan <- set_FlightPlan,
 									ctrl_ref0::get_FlightPlan <- get_FlightPlan,
-									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
 									ctrl_ref0::MoveDroneCall <- MoveDroneCall,
-									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 									ctrl_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
+									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
+									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall,
 									ctrl_ref0::FollowPlanCall <- FollowPlanCall,
-									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall
+									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall
 								]]
 							)
 								[|{|terminate|}|]
@@ -6226,13 +6558,13 @@ module SAR_Handheld
 									ctrl_ref0::get_systemHandheld <- get_systemHandheld,
 									ctrl_ref0::set_FlightPlan <- set_FlightPlan,
 									ctrl_ref0::get_FlightPlan <- get_FlightPlan,
-									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
 									ctrl_ref0::MoveDroneCall <- MoveDroneCall,
-									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall,
-									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
 									ctrl_ref0::FlyToAreaCoordinatesCall <- FlyToAreaCoordinatesCall,
+									ctrl_ref0::OnOffDroneCall <- OnOffDroneCall,
+									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall,
 									ctrl_ref0::FollowPlanCall <- FollowPlanCall,
-									ctrl_ref0::stopHandheldOperatingCall <- stopHandheldOperatingCall
+									ctrl_ref0::FlyToCoordinateCall <- FlyToCoordinateCall,
+									ctrl_ref0::DroneStopSearchCall <- DroneStopSearchCall
 								]]
 							)
 								[|{|terminate|}|]

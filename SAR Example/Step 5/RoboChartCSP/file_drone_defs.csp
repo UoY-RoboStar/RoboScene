@@ -1,7 +1,7 @@
 
 --
 -- RoboChart generator version 3.0.0.202209090727
--- Automatically generated on 19-06-2024 12:19:47
+-- Automatically generated on 08-04-2024 13:01:38
 --
 -- Iterated compression status: true
 -- Assertions compression status: false
@@ -13,6 +13,7 @@ Power_is(Power_On,Power_On) = true
 Power_is(_,Power_On) = false
 Power_is(Power_Off,Power_Off) = true
 Power_is(_,Power_Off) = false
+
 
 datatype Status = Status_High | Status_Low
 Status_is(Status_High,Status_High) = true

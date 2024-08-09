@@ -66,7 +66,7 @@ const_BatteryController_stm_ref0_hToDCommTime = 0
 
 -- generate nat
 nametype core_nat = union({0..2},{calc_type_min(Union(
-			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))})
+			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))})
 
 -- generate const_BatteryStatusStm_hToDCommTime
 const_BatteryStatusStm_hToDCommTime = 0
@@ -87,7 +87,7 @@ const_BatteryStatusStm_batteryCallWaitTime = 0
 
 -- generate real
 nametype core_real = union({ -2..2},{calc_type_min(Union(
-			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))}) 
+			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))}) 
 
 -- VECTOR TYPES AND OPERATIONS
 
@@ -171,7 +171,7 @@ const_SystemSW_dronePowerTime = 0
 
 -- generate int
 nametype core_int = union({ -2..2},{calc_type_min(Union(
-			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))})
+			{{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))..calc_type_max(Union({{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{0..2},{dronePowerTime|dronePowerTime <- {0..2}},{dronePowerTime|dronePowerTime <- {0..2}}}))})
 
 -- generate const_MovementController_stm_ref0_areaPoints
 const_MovementController_stm_ref0_areaPoints = ((0,0,0,0),(0,0,0,0),(0,0,0,0),(0,0,0,0))
