@@ -785,7 +785,7 @@ Timed(OneStep) {
 			sethomeCoord!(0,0,0,0) ->  
 			FollowFlightPlan ->
 			ADeadline(
-				ALL,{|DroneStopSearch|},s(151)
+				ALL,{|DroneStopSearch|},s(185)
 			); 
 			getfound?true ->
 			ReturnToHome ->
@@ -810,7 +810,7 @@ Timed(OneStep) {
 			RUN(diff(ALL,{|MissingPersonFound.true|})) /\ (
 				MissingPersonFound.true -> 
 					ADeadline(
-						ALL, {|DroneStopSearch|}, s(14)
+						ALL, {|DroneStopSearch|}, s(30)
 					);
 				RUN(ALL) /\ terminate -> SKIP
 				[] 
@@ -853,7 +853,7 @@ assert System :[divergence free]
 
 assert not System :[deterministic]
 
-assert System :[has trace [T]]: <ProvideFlightPlan.SearchType_AreaSearch,setflightPlan.SearchType_AreaSearch,PowerHandheld,tock,PowerDrone,OnOffDrone,tock,InputFlightPlan.SearchType_AreaSearch,InputHomeCoordinate.(0,0,0,0),sethomeCoord.(0,0,0,0),FollowFlightPlan,FollowPlan.SearchType_AreaSearch,getfound.false,InputAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),setareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),getareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),FlyToAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),SAR_SW::movementCall.(0,0,1,0),tock,SAR_SW::movementCall.(2,0,1,0),tock,SAR_SW::movementCall.(2,2,1,0),tock,SAR_SW::movementCall.(0,2,1,0),tock,SAR_SW::movementCall.(0,0,1,0),tock,MissingPersonFound.false,setfound.false,getfound.false,getfound.false,InputAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),setareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),getareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),FlyToAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),SAR_SW::movementCall.(0,0,1,0),tock,SAR_SW::movementCall.(2,0,1,0),tock,SAR_SW::movementCall.(2,2,1,0),tock,SAR_SW::movementCall.(0,2,1,0),tock,SAR_SW::movementCall.(0,0,1,0),tock,MissingPersonFound.true,setfound.true,getfound.true,tock,tock,tock,tock,tock,InformPilotToStopSearch,StopSearch,DroneStopSearch,getfound.true,tock,ReturnToHome,gethomeCoord.(0,0,0,0),FlyToCoordinate.(0,0,0,0),SAR_SW::movementCall.(0,0,0,0),tock,tock,tock,tock,tock,ManualControlOfUAV,ManualMovement.Direction_Down,setdirection.Direction_Down,MoveDrone.Direction_Down,SAR_SW::directionMovementCall.Direction_Down,tock,tock,tock,tock,tock,PowerDrone,OnOffDrone,tock,PowerHandheld,terminate>
+assert System :[has trace [T]]: <ProvideFlightPlan.SearchType_AreaSearch,setflightPlan.SearchType_AreaSearch,tock,PowerHandheld,tock,PowerDrone,OnOffDrone,tock,InputFlightPlan.SearchType_AreaSearch,InputHomeCoordinate.(0,0,0,0),sethomeCoord.(0,0,0,0),FollowFlightPlan,FollowPlan.SearchType_AreaSearch,getfound.false,InputAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),setareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),getareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),FlyToAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),SAR_SW::movementCall.(0,0,1,0),tock,SAR_SW::movementCall.(2,0,1,0),tock,SAR_SW::movementCall.(2,2,1,0),tock,SAR_SW::movementCall.(0,2,1,0),tock,SAR_SW::movementCall.(0,0,1,0),tock,MissingPersonFound.false,setfound.false,getfound.false,getfound.false,InputAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),setareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),getareaCoords.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),FlyToAreaCoordinates.((0,0,1,0),(2,0,1,0),(2,2,1,0),(0,2,1,0)),SAR_SW::movementCall.(0,0,1,0),tock,SAR_SW::movementCall.(2,0,1,0),tock,SAR_SW::movementCall.(2,2,1,0),tock,SAR_SW::movementCall.(0,2,1,0),tock,SAR_SW::movementCall.(0,0,1,0),tock,MissingPersonFound.true,setfound.true,getfound.true,tock,tock,tock,tock,tock,InformPilotToStopSearch,StopSearch,DroneStopSearch,getfound.true,tock,ReturnToHome,gethomeCoord.(0,0,0,0),FlyToCoordinate.(0,0,0,0),SAR_SW::movementCall.(0,0,0,0),tock,tock,tock,tock,tock,ManualControlOfUAV,ManualMovement.Direction_Down,setdirection.Direction_Down,MoveDrone.Direction_Down,SAR_SW::directionMovementCall.Direction_Down,tock,tock,tock,tock,tock,PowerDrone,OnOffDrone,tock,PowerHandheld,terminate>
  
 assert SystemTimedProperty [T= System
 
