@@ -41,7 +41,7 @@ Capabilities
 	lifeline World
 		out ProvideFlightPlan: SearchType -> Pilot
 	
-	Time
+	Constants
 		const minDecisionTime: int = ?
 		const maxDecisionTime: int = ?
 		const loop_min_count: int = 0
