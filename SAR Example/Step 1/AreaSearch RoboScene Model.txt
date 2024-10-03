@@ -1,3 +1,9 @@
+Constants
+	const minDecisionTime: int = ?
+	const maxDecisionTime: int = ?
+	const loop_min_count: int = 0
+	const loop_max_count: int = 10
+
 Capabilities
 	lifeline Pilot
 		out Turn on controller -> Handheld
@@ -20,12 +26,6 @@ Capabilities
 		
 	lifeline World
 		out Develop flight plan -> Pilot
-	
-	Constants
-		const minDecisionTime: int = ?
-		const maxDecisionTime: int = ?
-		const loop_min_count: int = 0
-		const loop_max_count: int = 10
 		
 
 SequenceDiagramGroup 
