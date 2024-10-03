@@ -5,7 +5,7 @@ Constants
 	const loop_max_count: int = 10
 
 Capabilities
-	lifeline Pilot
+	actor Pilot
 		out Turn on controller -> Handheld
 		out Turn on UAV -> Handheld
 		out Set Return to Home -> Handheld
@@ -15,16 +15,16 @@ Capabilities
 		out Take Control of UAV -> Handheld
 		out Land UAV -> Handheld
 
-	lifeline Handheld
+	actor Handheld
 
-	lifeline Drone
+	actor Drone
 
-	lifeline Operator
+	actor Operator
 		var found: boolean
 		in MissingPersonFound: boolean -> Operator
 		out Listen and communicate with payload operator
 		
-	lifeline World
+	actor World
 		out Develop flight plan -> Pilot
 		
 
