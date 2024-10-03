@@ -5,7 +5,7 @@ Constants
 	const loop_max_count: int = 10
 
 Capabilities
-	lifeline Pilot
+	actor Pilot
 		var flightPlan: SearchType
 		in MonitorUAVBatteryStatus <- Pilot
 		out PowerHandheld -> Handheld
@@ -23,7 +23,7 @@ Capabilities
 		out ManualControlOfUAV -> Handheld
 		out ManualMovement: Direction -> Handheld
 
-	lifeline Handheld
+	actor Handheld
 		var homeCoord: Coord
 		var areaCoords: AreaCoords
 		var direction: Direction
@@ -36,15 +36,15 @@ Capabilities
 		out FlyToCoordinate: Coord -> Drone
 		out MoveDrone: Direction -> Drone
 
-	lifeline Drone
+	actor Drone
 		out DisplayStatus: Status -> Handheld 
 
-	lifeline Operator
+	actor Operator
 		var found: boolean
 		in MissingPersonFound: boolean -> Operator
 		out InformPilotToStopSearch -> Pilot
 		
-	lifeline World
+	actor World
 		out ProvideFlightPlan: SearchType -> Pilot
 		
 
