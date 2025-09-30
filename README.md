@@ -41,9 +41,9 @@ The folder of [Metamodel documents](https://github.com/UoY-RoboStar/RoboScene/tr
 [PDF of the translation rules](https://github.com/UoY-RoboStar/RoboScene/blob/main/RoboScene%20to%20CSP%20Translation%20Rules.pdf) for RoboScene into CSP
 
 ## RoboScene Examples
-This is a collection of [examples](https://github.com/UoY-RoboStar/RoboScene/tree/main/RoboScene%20Examples) for reference. Consisting of :
+This is a collection of [examples](https://github.com/UoY-RoboStar/RoboScene/tree/main/RoboScene%20Examples) for reference. Consisting of, for each example, a subset of:
 - RoboScene documents (in .txt format)
-- CSP translations, and
+- CSP translations
 - Sequence diagram images
 
 Examples are structured into folders named "fragment x y":
