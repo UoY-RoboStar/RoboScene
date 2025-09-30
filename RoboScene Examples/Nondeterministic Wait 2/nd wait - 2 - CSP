@@ -1,0 +1,32 @@
+include "../core_timed_defs.csp"
+
+channel WatchForAbnormalities
+channel recordVideo
+
+channel terminate
+
+const_button_min = 1
+const_button_max = 6
+
+
+Timed(OneStep) { 
+	NDWait = timed_priority((Pilot [ A_Pilot || A_Observer ] Observer) [ union(A_Pilot, A_Observer) || A_Handheld ] Handheld)
+
+	Pilot = WatchForAbnormalities -> SKIP; (|~| x:{30..90}@wait(x)); terminate -> SKIP
+	
+	Handheld = terminate -> SKIP
+	
+	Observer = recordVideo -> SKIP; (|~| x:{const_button_min..const_button_max}@wait(x)); terminate -> SKIP
+	
+}
+
+A_Pilot = {WatchForAbnormalities, tock,terminate}
+
+A_Observer = {recordVideo, tock,terminate}
+
+A_Handheld = {tock,terminate}
+
+assert not NDWait :[deadlock free]
+assert NDWait :[divergence free]
+assert not NDWait :[deterministic]
+assert NDWait :[has trace [T]]: <WatchForAbnormalities,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,recordVideo,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock>

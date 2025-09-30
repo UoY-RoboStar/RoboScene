@@ -1,0 +1,30 @@
+include "../core_timed_defs.csp"
+
+channel WatchForAbnormalities
+channel recordVideo
+
+const_button = 6
+
+
+
+Timed(OneStep) { 
+	DWait = timed_priority((Pilot [ A_Pilot || A_Observer ] Observer) [ union(A_Pilot, A_Observer) || A_Handheld ] Handheld )
+
+	Pilot = WatchForAbnormalities -> SKIP; wait(30)
+	
+	Handheld = SKIP
+	
+	Observer = recordVideo -> SKIP; wait(const_button)
+
+}
+
+A_Pilot = {WatchForAbnormalities, tock}
+
+A_Observer = {recordVideo, tock}
+
+A_Handheld = {tock}
+
+assert not DWait :[deadlock free]
+assert DWait :[divergence free]
+assert DWait :[deterministic]
+assert DWait :[has trace [T]]: <WatchForAbnormalities,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,tock,recordVideo,tock,tock,tock,tock,tock,tock>

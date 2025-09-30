@@ -1,0 +1,31 @@
+Capabilities
+	lifeline Pilot
+		var flightPlan: SearchType
+		var wAbnormalities: boolean
+		var responsive: boolean
+		in WatchForAbnormalities: boolean <- Pilot
+		in AreControlsResponsive: boolean <- Pilot
+		out followFlightPlan:SearchType -> Handheld
+
+	lifeline Handheld
+	
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld
+	
+	Sequence Alt
+		Actors Pilot, Handheld
+		Vars flightPlan, wAbnormalities, responsive
+		
+			Pilot->Pilot: WatchForAbnormalities?wAbnormalities
+			Pilot->Pilot: AreControlsResponsive?responsive
+			alt responsive==true & wAbnormalities==false
+			    Pilot->Handheld: followFlightPlan!SearchType_RapidParallelLine
+			end

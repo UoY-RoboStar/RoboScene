@@ -1,0 +1,24 @@
+include "../core_timed_defs.csp"
+
+channel powerHandheld
+
+const_button = 6
+
+
+
+Timed(OneStep) { 
+	DWait = timed_priority(Pilot [ A_Pilot || A_Handheld ] Handheld)
+
+	Handheld = SKIP
+	
+	Pilot = powerHandheld -> SKIP; wait(const_button)
+}
+
+A_Pilot = {powerHandheld, tock}
+
+A_Handheld = {tock}
+
+assert not DWait :[deadlock free]
+assert DWait :[divergence free]
+assert DWait :[deterministic]
+assert DWait :[has trace [T]]: <powerHandheld,tock,tock,tock,tock,tock,tock>

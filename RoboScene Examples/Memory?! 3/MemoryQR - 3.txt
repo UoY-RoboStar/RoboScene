@@ -1,0 +1,30 @@
+Capabilities
+	lifeline Pilot
+		var flightPlan: SearchType
+		var wAbnormalities: boolean
+		in WatchForAbnormalities: boolean <- Pilot
+		out followFlightPlan:SearchType -> Handheld
+
+	lifeline Handheld
+	
+		
+	lifeline Observer
+		out recordVideo -> Handheld
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Observer
+	
+	Sequence example
+		Actors Pilot, Handheld, Observer
+		Vars flightPlan, wAbnormalities
+		
+		Observer->Handheld: recordVideo
+		Pilot->Pilot:WatchForAbnormalities(wAbnormalities)
+		Pilot->Handheld:followFlightPlan?searchType

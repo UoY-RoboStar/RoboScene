@@ -1,0 +1,28 @@
+Capabilities
+	lifeline Pilot
+		in WatchForAbnormalities <- Pilot
+
+	lifeline Handheld
+		
+	lifeline Observer
+		out recordVideo -> Handheld
+		
+	Time
+		const const_button: int = 6
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Observer
+	
+	Sequence example
+		Actors Pilot, Handheld, Observer
+		Vars 
+		
+			Observer->Handheld: recordVideo
+			note over Handheld: wait(const_button)
+			Pilot->Pilot: WatchForAbnormalities
+			wait(30) on Pilot

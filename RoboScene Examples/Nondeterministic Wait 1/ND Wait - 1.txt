@@ -1,0 +1,25 @@
+Capabilities
+	lifeline Pilot
+		out powerHandheld -> Handheld
+
+	lifeline Handheld
+	
+		
+	Time
+		const const_button_min: int = 1
+		const const_button_max: int = 6
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld
+	
+	Sequence example
+		Actors Pilot, Handheld
+		Vars 
+		
+		Pilot->Handheld: powerHandheld
+		wait([const_button_min,const_button_max]) on Pilot

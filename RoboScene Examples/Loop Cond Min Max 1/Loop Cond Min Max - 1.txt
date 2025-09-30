@@ -1,0 +1,28 @@
+Capabilities
+	lifeline Pilot
+		var responsive: boolean
+		in AreControlsResponsive: boolean <- Pilot
+		out powerDrone -> Handheld
+
+	lifeline Handheld
+	
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld
+	
+	Sequence example
+		Actors Pilot, Handheld
+		Vars  responsive
+		
+		Pilot->Pilot: AreControlsResponsive?responsive
+		loop (1,4) [responsive==true]
+		    Pilot->Pilot: AreControlsResponsive?responsive
+		end
+		Pilot->Handheld:powerDrone

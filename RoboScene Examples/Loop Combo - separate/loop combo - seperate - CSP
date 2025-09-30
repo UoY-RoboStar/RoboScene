@@ -1,0 +1,192 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel AreControlsResponsive: Bool
+
+channel powerDrone
+channel recordVideo
+channel takePicture
+
+channel setresponsive: Bool
+channel getresponsive: Bool
+
+
+channel setCount: IDS.core_int.core_int
+channel getCount: IDS.core_int.core_int
+
+loop_1_min_count = 1
+loop_1_max_count = 3
+	
+-- declaring identifiers of fragments
+datatype IDS = 
+              ID_ALT  | 
+              ID_LOOP | 
+              ID_PAR | 
+              ID_STR
+
+channel guard: IDS.core_int.core_int.Bool
+channel alt: IDS.core_int
+channel loop: IDS.core_int
+channel par: IDS.core_int
+channel str: IDS.core_int
+
+nametype core_int = {0..5}
+
+
+Timed(OneStep) { 
+	Loop = timed_priority(((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [|diff(inter(A_Observer,union(A_Pilot,A_Handheld)),gets) |] Observer)  [| {|loop,guard,terminate|} |] guards) [| union(sharedVars, {|terminate|}) |] varMemory )) \{|guard,loop|}
+	
+	
+	
+	-- Lifelines
+	
+	Pilot = AreControlsResponsive?responsive ->
+	 (setresponsive!responsive -> SKIP);
+	  loop_Pilot_1; powerDrone -> SKIP; terminate -> SKIP
+	
+	Handheld = powerDrone -> SKIP; recordVideo -> loop_Handheld_1; terminate -> SKIP
+	
+	Observer = recordVideo -> loop_Observer_1; terminate -> SKIP
+	
+	
+	
+	
+	-- Loop constructs
+
+	loop_Pilot_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+					(x)&(AreControlsResponsive?responsive ->
+	 					setresponsive!responsive -> loop_Pilot_1) 
+					[]
+					(not(x))&(SKIP)
+					)
+					
+	loop_Observer_1 = loop!ID_LOOP.2 -> guard.ID_LOOP.2.1?x -> (
+					(x)&(takePicture -> loop_Observer_1) 
+					[]
+					(not(x))&(SKIP)
+					)
+	
+	
+	loop_Handheld_1 = loop!ID_LOOP.2 -> guard.ID_LOOP.2.1?x -> (
+					(x)&(takePicture -> loop_Handheld_1) 
+					[]
+					(not(x))&(SKIP)
+					)
+	
+	
+	
+	
+	-- Handling of guards for loop and alt constructs
+	
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+	
+	evaluation = reset_counters; guards_response
+	
+	
+	-- Loop counters
+	
+	counters = Counter_ID_1(0) [|{|terminate|}|] Counter_ID_2(0)
+	
+	Counter_ID_1(count) = 
+				getCount.ID_LOOP.1!count -> Counter_ID_1(count)
+				[]
+				setCount.ID_LOOP.1?x__ -> Counter_ID_1(x__)
+				[]
+				terminate -> SKIP
+	
+	Counter_ID_2(count) = 
+				getCount.ID_LOOP.2!count -> Counter_ID_2(count)
+				[]
+				setCount.ID_LOOP.2?x__ -> Counter_ID_2(x__)
+				[]
+				terminate -> SKIP
+	
+	
+	
+	
+	reset_counters = setCount.ID_LOOP.1!0 -> setCount.ID_LOOP.2!0 -> SKIP
+	
+	
+	
+
+	guards_response = loop?ID_LOOP.id -> ((id==1)&(getresponsive?responsive -> getCount.ID_LOOP.1?x -> (
+					not(responsive==true)&(setCount.ID_LOOP.1!0 -> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+					[] (x<loop_1_min_count and responsive==true)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+					[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+					[] (not(x<loop_1_min_count) and not(x>=loop_1_max_count) and responsive==true)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+					[] ((x>=loop_1_min_count and x<loop_1_max_count) and responsive==true)&((setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+				)))
+				[] 
+				(id==2)&(getCount.ID_LOOP.2?x -> (
+					(x<loop_1_min_count)&(setCount.ID_LOOP.2!(x+1)-> SKIP; guard.ID_LOOP.2.1!true -> SKIP)
+					[] (x==loop_1_max_count)&(setCount.ID_LOOP.2!0-> SKIP; guard.ID_LOOP.2.1!false -> SKIP)
+					[] (not(x<loop_1_min_count) and not(x>=loop_1_max_count))&(setCount.ID_LOOP.2!(x+1)-> SKIP; guard.ID_LOOP.2.1!true -> SKIP)
+					[] (x>=loop_1_min_count and x<loop_1_max_count)&((setCount.ID_LOOP.2!0-> SKIP; guard.ID_LOOP.2.1!false -> SKIP) |~| (setCount.ID_LOOP.2!(x+1)-> SKIP; guard.ID_LOOP.2.1!true -> SKIP)
+				)))
+				); guards_response
+		[] 
+		terminate -> SKIP
+	
+	
+	
+	
+	-- lifeline memory
+	
+	varMemory = Memory_responsive(true)
+				 							
+	Memory_responsive(responsive) =
+				getresponsive!responsive -> Memory_responsive(responsive)
+				[]
+				setresponsive?x__ -> Memory_responsive(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = union({|AreControlsResponsive,powerDrone,terminate,guard.ID_LOOP.1.1,loop.ID_LOOP.1|},responsiveVars)
+
+A_Handheld = {|recordVideo,takePicture,loop.ID_LOOP.2,guard.ID_LOOP.2.1,powerDrone,terminate|}
+
+A_Observer = {|recordVideo,takePicture,loop.ID_LOOP.2,guard.ID_LOOP.2.1,terminate|}
+
+A_Counters = countVars					
+
+sharedVars = responsiveVars
+
+
+responsiveVars = {|getresponsive,setresponsive|}
+countVars = {|getCount,setCount|}
+
+gets = {|getresponsive|}
+
+assert not Loop :[deadlock free]
+assert Loop :[divergence free]
+assert not Loop :[deterministic]
+assert Loop :[has trace [T]]: <AreControlsResponsive.false,setresponsive.false,getresponsive.false,powerDrone,recordVideo,takePicture,terminate>
+
+assert not Loop :[has trace [T]]: <AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,powerDrone,recordVideo,terminate> 
+	
+assert Loop :[has trace [T]]: <AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.false,setresponsive.false,
+	getresponsive.false,powerDrone,recordVideo,takePicture,terminate> 
+	
+assert Loop :[has trace [T]]: <AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.false,setresponsive.false,
+	getresponsive.false,powerDrone,recordVideo,takePicture,takePicture,terminate> 
+	
+assert Loop :[has trace [T]]: <AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.false,setresponsive.false,
+	getresponsive.false,powerDrone,recordVideo,takePicture,takePicture,takePicture,terminate> 
+	
+assert not Loop :[has trace [T]]: <AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+	getresponsive.true,powerDrone,recordVideo,takePicture,terminate> 
+	
+

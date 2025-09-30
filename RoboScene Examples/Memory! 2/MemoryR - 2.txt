@@ -1,0 +1,20 @@
+Capabilities
+	lifeline Observer
+		var wAbnormalities: boolean
+		in WatchForAbnormalities: boolean <- Observer
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Observer
+	
+	Sequence example
+		Actors Observer
+		Vars wAbnormalities
+		
+		Observer->Observer: WatchForAbnormalities(wAbnormalities)

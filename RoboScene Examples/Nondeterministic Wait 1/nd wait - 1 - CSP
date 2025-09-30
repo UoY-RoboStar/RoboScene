@@ -1,0 +1,28 @@
+include "../core_timed_defs.csp"
+
+channel powerHandheld
+channel terminate
+
+const_button_min = 1
+const_button_max = 6
+
+
+Timed(OneStep) { 
+	NDWait = timed_priority(Pilot [ A_Pilot || A_Handheld ] Handheld)
+
+	Handheld = terminate -> SKIP
+	
+	Pilot = powerHandheld -> SKIP; (|~| x:{const_button_min..const_button_max}@wait(x)); terminate -> SKIP
+}
+
+A_Pilot = {powerHandheld, terminate, tock}
+
+A_Handheld = {tock, terminate}
+
+assert not NDWait :[deadlock free]
+assert NDWait :[divergence free]
+assert not NDWait :[deterministic]
+assert NDWait :[has trace [T]]: <powerHandheld,tock,tock,tock,terminate>
+assert NDWait :[has trace [T]]: <powerHandheld,tock,tock,terminate>
+assert NDWait :[has trace [T]]: <powerHandheld,tock,tock,tock,tock,terminate>
+assert NDWait :[has trace [T]]: <powerHandheld,tock,tock,tock,tock,tock,tock,terminate>

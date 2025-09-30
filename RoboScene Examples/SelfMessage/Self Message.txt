@@ -1,0 +1,19 @@
+Capabilities
+	lifeline Pilot
+		in AreControlsResponsive <- Pilot
+
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot
+	
+	Sequence example
+		Actors Pilot
+		Vars 
+		
+		Pilot->Pilot: AreControlsResponsive

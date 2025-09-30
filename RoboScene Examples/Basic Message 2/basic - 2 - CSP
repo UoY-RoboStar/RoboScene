@@ -1,0 +1,23 @@
+include "../core_timed_defs.csp"
+
+channel powerHandheld
+
+channel terminate
+
+Timed(OneStep) { 
+	Basic2 = timed_priority(Pilot [ A_Pilot || A_Handheld ] Handheld )
+
+	Handheld = powerHandheld -> terminate -> SKIP 
+
+	Pilot = powerHandheld -> terminate -> SKIP 
+}
+
+A_Handheld = {powerHandheld, terminate, tock} 
+
+A_Pilot = {powerHandheld, tock, terminate}
+
+assert not Basic2 :[deadlock free]
+assert Basic2 :[divergence free]
+assert Basic2 :[deterministic]
+assert Basic2 :[has trace [T]]: <powerHandheld,terminate>
+

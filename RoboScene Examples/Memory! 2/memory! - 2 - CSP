@@ -1,0 +1,39 @@
+include "../core_timed_defs.csp"
+
+channel WatchForAbnormalities: Bool
+
+channel setwAbnormalities: Bool
+channel getwAbnormalities: Bool
+
+channel terminate
+
+
+
+
+
+Timed(OneStep) { 
+	Memory = timed_priority(Observer [| union(sharedVars, {terminate}) |] varMemory )
+
+	Observer = getwAbnormalities?wAbnormalities:{wAbnormalities|wAbnormalities <- Bool} -> (WatchForAbnormalities!wAbnormalities -> SKIP); terminate -> SKIP 
+	
+	
+
+	varMemory = Memory_wAbnormalities(false)
+
+	Memory_wAbnormalities(wAbnormalities) =
+				getwAbnormalities!wAbnormalities -> Memory_wAbnormalities(wAbnormalities)
+				[]
+				setwAbnormalities?x__ -> Memory_wAbnormalities(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Observer = {|WatchForAbnormalities, terminate, tock|}
+
+sharedVars = union(wAbnormalitiesVars,{||})
+wAbnormalitiesVars = {|getwAbnormalities,setwAbnormalities|}
+
+assert not Memory :[deadlock free]
+assert Memory :[divergence free]
+assert Memory :[deterministic]
+assert Memory :[has trace [T]]: <getwAbnormalities.false,WatchForAbnormalities.false>

@@ -1,0 +1,22 @@
+Capabilities
+	lifeline Pilot
+		out powerHandheld -> Handheld
+
+	lifeline Handheld
+	
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld
+	
+	Sequence example
+		Actors Pilot, Handheld
+		Vars 
+		
+		Pilot->Handheld: powerHandheld

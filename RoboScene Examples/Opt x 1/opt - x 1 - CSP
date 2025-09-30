@@ -1,0 +1,128 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel followFlightPlan: SearchType
+channel WatchForAbnormalities: Bool
+channel AreControlsResponsive: Bool
+
+channel setwAbnormalities: Bool
+channel getwAbnormalities: Bool
+
+channel setSearchType: SearchType
+channel getSearchType: SearchType
+
+channel setresponsive: Bool
+channel getresponsive: Bool
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+
+-- declaring identifiers of fragments
+datatype IDS = 
+              ID_ALT  | 
+              ID_LOOP | 
+              ID_PAR | 
+              ID_STR |
+              ID_OPT
+
+channel guard: IDS.core_int.core_int.Bool
+channel alt: IDS.core_int
+channel loop: IDS.core_int
+channel par: IDS.core_int
+channel str: IDS.core_int
+channel opt: IDS.core_int
+
+nametype core_int = {0..5}
+
+Timed(OneStep) { 
+	Opt = timed_priority((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [| {|opt,guard,terminate|} |] guards) [| union(sharedVars, {terminate}) |] varMemory )) \{|guard,opt|}
+
+	Pilot = WatchForAbnormalities?wAbnormalities ->
+	 (setwAbnormalities!wAbnormalities -> SKIP); AreControlsResponsive?responsive ->
+	 (setresponsive!responsive -> SKIP); Opt_Pilot_1; terminate -> SKIP
+	
+	Handheld = Opt_Handheld_1; terminate -> SKIP
+
+	Opt_Pilot_1 = opt.ID_OPT.1  -> SKIP; guard.ID_OPT.1.1?x -> (
+	(x)&(followFlightPlan!SearchType_RapidParallelLine -> SKIP)
+	[]
+	(not(x))&(SKIP))
+	
+	Opt_Handheld_1 = opt.ID_OPT.1 -> SKIP; guard.ID_OPT.1.1?x -> (
+	(x)&(	
+	(followFlightPlan?searchType -> 
+	(setSearchType!searchType -> SKIP)))
+	[]
+	(not(x))&(SKIP))
+		
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+	
+	evaluation = reset_counters; guards_response
+	
+	counters = terminate -> SKIP
+	
+	reset_counters = SKIP
+	
+	
+	guards_response = opt?ID_OPT.x -> ((x==1)&(getresponsive?responsive -> getwAbnormalities?wAbnormalities -> (
+		((wAbnormalities == false) and (responsive == true))&(guard.ID_OPT.1.1!true -> SKIP)
+		[] not((wAbnormalities == false) and (responsive == true))&(guard.ID_OPT.1.1!false -> SKIP)))); guards_response
+			[] terminate -> SKIP
+	
+	
+	
+	
+	varMemory = Memory_searchType(SearchType_AreaSearch)
+					 [| { terminate } |] (
+					 Memory_wAbnormalities(false)
+					 [| { terminate } |]
+					Memory_responsive(true))
+
+	Memory_searchType(searchType) =
+				getSearchType!searchType -> Memory_searchType(searchType)
+				[]
+				setSearchType?x__ -> Memory_searchType(x__)
+				[]
+				terminate -> SKIP
+				
+				
+	Memory_wAbnormalities(wAbnormalities) =
+				getwAbnormalities!wAbnormalities -> Memory_wAbnormalities(wAbnormalities)
+				[]
+				setwAbnormalities?x__ -> Memory_wAbnormalities(x__)
+				[]
+				terminate -> SKIP
+				
+	Memory_responsive(responsive) =
+				getresponsive!responsive -> Memory_responsive(responsive)
+				[]
+				setresponsive?x__ -> Memory_responsive(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = union(union(union({|AreControlsResponsive, WatchForAbnormalities, followFlightPlan, guard.ID_OPT.1.1,opt.ID_OPT.1,terminate|},searchTypeVars),wAbnormalitiesVars),responsiveVars)
+
+A_Handheld = {|followFlightPlan,guard.ID_OPT.1.1,opt.ID_OPT.1,terminate|}
+
+A_Counters = countVars
+countVars = {||}
+
+sharedVars = union(union(searchTypeVars,wAbnormalitiesVars),responsiveVars)
+
+searchTypeVars = {|setSearchType,getSearchType|}
+wAbnormalitiesVars = {|getwAbnormalities,setwAbnormalities|}
+responsiveVars = {|getresponsive,setresponsive|}
+
+gets = {|getwAbnormalities,getSearchType,getresponsive|}
+
+
+assert not Opt :[deadlock free]
+assert Opt :[divergence free]
+assert Opt :[deterministic]
+assert Opt :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.true,setresponsive.true,getresponsive.true,getwAbnormalities.false,followFlightPlan.SearchType_RapidParallelLine,setSearchType.SearchType_RapidParallelLine,terminate>
+assert Opt :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.false,setresponsive.false,getresponsive.false,getwAbnormalities.false,terminate>
+assert Opt :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.false,setresponsive.false,getresponsive.false,getwAbnormalities.true,terminate>
+assert Opt :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,getresponsive.true,getwAbnormalities.true,terminate>
+
+

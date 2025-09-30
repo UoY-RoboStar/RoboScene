@@ -1,0 +1,24 @@
+Capabilities
+	lifeline Pilot
+		out powerDrone -> Handheld
+
+	lifeline Handheld
+	
+		
+	Time
+		const const_button: int = 6
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Observer
+	
+	Sequence example
+		Actors Pilot, Handheld, Observer
+		Vars
+		
+			Pilot->Handheld: powerHandheld
+			wait (const_button) on Pilot

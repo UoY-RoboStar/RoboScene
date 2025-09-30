@@ -1,0 +1,160 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel followFlightPlan: SearchType
+channel WatchForAbnormalities: Bool
+channel AreControlsResponsive: Bool
+channel takePicture
+channel recordVideo
+channel powerDrone
+
+channel setwAbnormalities: Bool
+channel getwAbnormalities: Bool
+
+channel setSearchType: SearchType
+channel getSearchType: SearchType
+
+channel setresponsive: Bool
+channel getresponsive: Bool
+
+
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+				
+-- declaring identifiers of fragments
+datatype IDS = 
+              ID_ALT  | 
+              ID_LOOP | 
+              ID_PAR | 
+              ID_STR
+
+channel guard: IDS.core_int.core_int.Bool
+channel alt: IDS.core_int
+channel loop: IDS.core_int
+channel par: IDS.core_int
+channel str: IDS.core_int
+
+nametype core_int = {0..5}
+
+
+
+
+
+Timed(OneStep) { 
+	Con = timed_priority(((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [| diff(inter(union(A_Pilot, A_Handheld),A_Observer),gets) |] Observer) [| {|alt,guard,terminate|} |] guards) [| union(sharedVars, {|terminate|}) |] varMemory )) \{|alt,guard|}
+	
+	Pilot = WatchForAbnormalities?wAbnormalities ->
+	 (setwAbnormalities!wAbnormalities -> SKIP); 
+	 AreControlsResponsive?responsive ->
+	 (setresponsive!responsive -> SKIP); alt_Pilot_1; terminate -> SKIP
+	
+	Handheld = alt_Handheld_1;  terminate -> SKIP
+	
+	Observer = alt_Observer_1; terminate -> SKIP
+
+	alt_Pilot_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> (
+			x&(followFlightPlan!SearchType_RapidParallelLine -> SKIP) 
+			[] y&(followFlightPlan!SearchType_Linear -> SKIP)
+			[] not(x or y)&(powerDrone->SKIP))
+	 
+	alt_Observer_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y-> (
+			x&((takePicture -> SKIP  	
+				)\{|takePicture|}) 
+			[] y&(recordVideo -> SKIP)
+			[] not(x or y)&SKIP)
+	
+	alt_Handheld_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> (
+			x&((takePicture -> SKIP;  	
+				(followFlightPlan?searchType -> 
+				(setSearchType!searchType -> SKIP)))\{|takePicture|}) 
+			[] y&((followFlightPlan?searchType -> 
+				(setSearchType!searchType -> SKIP)); recordVideo -> SKIP)
+			[] not(x or y)&(powerDrone->SKIP))
+
+	
+		
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+	
+	evaluation = reset_counters; guards_response
+	
+	counters = SKIP [] terminate -> SKIP
+	
+	reset_counters = SKIP
+	
+	
+	guards_response = alt?ID_ALT.x -> ((x==1)&(getresponsive?responsive -> getwAbnormalities?wAbnormalities -> (
+				((wAbnormalities == true) and (responsive == true))&(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!true -> SKIP)
+			[] ((wAbnormalities == false) and (responsive == true))&(guard.ID_ALT.1.1!true -> guard.ID_ALT.1.2!false -> SKIP)
+			[] not(((wAbnormalities == true) and (responsive == true)) or ((wAbnormalities == false) and (responsive == true)))&(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!false -> SKIP)))); guards_response
+			[] terminate -> SKIP
+		
+			
+	
+	varMemory = Memory_searchType(SearchType_AreaSearch)
+					 [| { terminate } |] (
+					 Memory_wAbnormalities(false)
+					 [| { terminate } |]
+					Memory_responsive(true))
+
+	Memory_searchType(searchType) =
+				getSearchType!searchType -> Memory_searchType(searchType)
+				[]
+				setSearchType?x__ -> Memory_searchType(x__)
+				[]
+				terminate -> SKIP
+								
+	Memory_wAbnormalities(wAbnormalities) =
+				getwAbnormalities!wAbnormalities -> Memory_wAbnormalities(wAbnormalities)
+				[] 
+				setwAbnormalities?x__ -> Memory_wAbnormalities(x__)
+				[]
+				terminate -> SKIP
+				
+	Memory_responsive(responsive) =
+				getresponsive!responsive -> Memory_responsive(responsive)
+				[]
+				setresponsive?x__ -> Memory_responsive(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = union(union(union({|AreControlsResponsive,powerDrone,WatchForAbnormalities, followFlightPlan,terminate,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1|},searchTypeVars),wAbnormalitiesVars),responsiveVars)
+
+A_Handheld = {|powerDrone,recordVideo,takePicture,followFlightPlan,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1,terminate|} 
+
+A_Observer = {|recordVideo,takePicture,terminate,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1|}							
+
+
+A_Counters = countVars
+countVars = {||}
+
+sharedVars = union(union(searchTypeVars,wAbnormalitiesVars),responsiveVars)
+
+searchTypeVars = {|setSearchType,getSearchType|}
+wAbnormalitiesVars = {|getwAbnormalities,setwAbnormalities|}
+responsiveVars = {|getresponsive,setresponsive|}
+
+gets = {|getwAbnormalities,getSearchType,getresponsive|}
+
+
+ALL = {|terminate,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1,followFlightPlan,WatchForAbnormalities,AreControlsResponsive,takePicture,recordVideo,powerDrone,setwAbnormalities,getwAbnormalities,setSearchType,getSearchType,setresponsive,getresponsive|}
+
+
+assert not Con :[deadlock free]
+assert Con :[divergence free]
+assert Con :[deterministic]
+
+assert Con :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.false,setresponsive.false,
+getresponsive.false,getwAbnormalities.false,powerDrone,terminate>
+
+
+assert Con :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.false,followFlightPlan.SearchType_RapidParallelLine,
+setSearchType.SearchType_RapidParallelLine,terminate>
+
+assert Con :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,terminate>
+
+

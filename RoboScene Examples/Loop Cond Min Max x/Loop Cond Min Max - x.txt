@@ -1,0 +1,34 @@
+Capabilities
+	lifeline Pilot
+		var flightPlan: SearchType
+		var wAbnormalities: boolean
+		var responsive: boolean
+		in WatchForAbnormalities: boolean <- Pilot
+		in AreControlsResponsive: boolean <- Pilot
+		out followFlightPlan:SearchType -> Handheld
+
+	lifeline Handheld
+	
+		
+	lifeline Observer
+		out takePicture -> Handheld
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Observer
+	
+	Sequence LoopCondMinMax
+		Actors Pilot, Handheld, Observer
+		Vars flightPlan, wAbnormalities, responsive
+			Pilot->Pilot: AreControlsResponsive?responsive
+			loop (1,4) [responsive==true]
+			    Observer->Handheld: takePicture
+			    Pilot->Handheld: followFlightPlan(searchType)
+			    Pilot->Pilot: AreControlsResponsive?responsive
+			end

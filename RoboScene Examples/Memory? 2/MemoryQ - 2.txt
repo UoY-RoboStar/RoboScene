@@ -1,0 +1,23 @@
+Capabilities
+	lifeline Pilot
+		var flightPlan: SearchType
+		out followFlightPlan:SearchType -> Handheld
+
+	lifeline Handheld
+	
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot
+	
+	Sequence example
+		Actors Pilot, Handheld
+		Vars flightPlan
+		
+		Pilot->Handheld: followFlightPlan?searchType

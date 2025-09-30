@@ -1,0 +1,26 @@
+Capabilities
+	lifeline Pilot
+		out powerHandheld -> Handheld
+
+	lifeline Handheld
+	
+		
+	lifeline Observer
+		out recordVideo -> Handheld
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Observer
+	
+	Sequence example
+		Actors Pilot, Handheld, Observer
+		Vars 
+		
+		Pilot->Handheld: powerHandheld
+		Observer->Handheld: recordVideo

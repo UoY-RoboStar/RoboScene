@@ -1,0 +1,42 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel followFlightPlan: SearchType
+
+channel setSearchType: SearchType
+channel getSearchType: SearchType
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+
+
+Timed(OneStep) { 
+	Memory = timed_priority(Pilot [| union(sharedVars, {terminate}) |] varMemory )
+
+	Pilot = followFlightPlan?searchType:{searchType|searchType <- SearchType} -> (setSearchType!searchType -> SKIP); terminate -> SKIP 
+	
+	
+
+	varMemory = Memory_searchType(SearchType_AreaSearch)
+
+	Memory_searchType(searchType) =
+				getSearchType!searchType -> Memory_searchType(searchType)
+				[]
+				setSearchType?x__ -> Memory_searchType(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = {|followFlightPlan, terminate,tock|}
+
+sharedVars = union(searchTypeVars,{||})
+searchTypeVars = {|setSearchType,getSearchType|}
+
+gets = {|getSearchType|}
+
+
+assert not Memory :[deadlock free]
+assert Memory :[divergence free]
+assert Memory :[deterministic]
+assert Memory :[has trace [T]]: <followFlightPlan.SearchType_MountainFace,setSearchType.SearchType_MountainFace>
+assert not SKIP :[deadlock free]
