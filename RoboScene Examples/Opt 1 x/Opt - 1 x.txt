@@ -1,0 +1,28 @@
+Capabilities
+	lifeline Pilot
+		var flightPlan: SearchType
+		var responsive: boolean
+		in AreControlsResponsive: boolean <- Pilot
+		
+		out followFlightPlan:FlightPlan -> Handheld
+
+	lifeline Handheld
+	
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld
+	
+	Sequence Opt
+		Actors Pilot, Handheld
+		Vars flightPlan, responsive
+			Pilot->Pilot: AreControlsResponsive?responsive
+			opt responsive==true
+			    Observer->Handheld: takePicture
+			    Pilot->Handheld: followFlightPlan(searchType)
+			end

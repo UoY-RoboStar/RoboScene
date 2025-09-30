@@ -1,0 +1,88 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel followFlightPlan: SearchType
+channel WatchForAbnormalities: Bool
+channel recordVideo
+
+channel setwAbnormalities: Bool
+channel getwAbnormalities: Bool
+
+channel setSearchType: SearchType
+channel getSearchType: SearchType
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+
+
+
+Timed(OneStep) { 
+	DeadlineProcess = timed_priority(((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [| diff(inter(union(A_Pilot, A_Handheld),A_Observer),gets) |] Observer)[| union(sharedVars, {terminate}) |] varMemory) 
+
+	Pilot = getwAbnormalities?wAbnormalities -> WatchForAbnormalities!wAbnormalities -> Deadline(dead_1, 0); terminate -> SKIP
+	
+	dead_1 = followFlightPlan!SearchType_Linear->SKIP
+	
+	Observer = Deadline(dead_2, 2)
+	
+	dead_2 = recordVideo -> wait(1); terminate -> SKIP
+	
+	Handheld = Deadline(dead_3, 2); terminate -> SKIP
+	
+	dead_3 = recordVideo -> followFlightPlan?searchType -> (setSearchType!searchType -> SKIP)
+	
+	varMemory = Memory_searchType(SearchType_AreaSearch)
+					 [| { terminate } |]
+					 Memory_wAbnormalities(false)
+					-- [| { terminate } |] (
+					-- Memory_asearchType(SearchType_AreaSearch)
+					-- )
+					-- )
+
+	Memory_searchType(searchType) =
+				getSearchType!searchType -> Memory_searchType(searchType)
+				[]
+				setSearchType?x__ -> Memory_searchType(x__)
+				[]
+				terminate -> SKIP
+				
+				
+	Memory_wAbnormalities(wAbnormalities) =
+				getwAbnormalities!wAbnormalities -> Memory_wAbnormalities(wAbnormalities)
+				[]
+				setwAbnormalities?x__ -> Memory_wAbnormalities(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = union(union({|WatchForAbnormalities, followFlightPlan,terminate|},searchTypeVars),wAbnormalitiesVars)
+
+A_Handheld = {|recordVideo, followFlightPlan, terminate|} 
+
+A_Observer = {|recordVideo, terminate|}
+
+sharedVars = union(searchTypeVars,wAbnormalitiesVars)
+
+searchTypeVars = {|setSearchType,getSearchType|}
+wAbnormalitiesVars = {|getwAbnormalities,setwAbnormalities|}
+
+gets = {|getSearchType,getwAbnormalities|}
+
+assert not DeadlineProcess :[deadlock free]
+assert DeadlineProcess :[divergence free]
+assert DeadlineProcess :[deterministic]
+
+assert DeadlineProcess :[has trace [T]]: <getwAbnormalities.false,WatchForAbnormalities.false,recordVideo,
+followFlightPlan.SearchType_Linear,tock,setSearchType.SearchType_Linear,terminate>
+
+assert DeadlineProcess :[has trace [T]]: <getwAbnormalities.false,recordVideo,tock,WatchForAbnormalities.false,
+followFlightPlan.SearchType_Linear,setSearchType.SearchType_Linear,terminate>
+
+assert not DeadlineProcess :[has trace [T]]: <getwAbnormalities.false,WatchForAbnormalities.false,recordVideo,
+tock,followFlightPlan.SearchType_Linear,setSearchType.SearchType_Linear>
+
+assert not DeadlineProcess :[has trace [T]]: <getwAbnormalities.false,WatchForAbnormalities.false,recordVideo,
+followFlightPlan.SearchType_Linear,setSearchType.SearchType_Linear,terminate>
+
+
+

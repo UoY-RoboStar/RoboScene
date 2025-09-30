@@ -1,0 +1,191 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel followFlightPlan: SearchType
+channel decideFlightPlan: SearchType
+channel AreControlsResponsive: Bool
+channel powerDrone
+channel recordVideo
+channel takePicture
+channel WatchForAbnormalities: Bool
+
+channel setwAbnormalities: Bool
+channel getwAbnormalities: Bool
+
+channel setSearchType: SearchType
+channel getSearchType: SearchType
+
+channel setresponsive: Bool
+channel getresponsive: Bool
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+
+
+-- declaring identifiers of fragments
+datatype IDS = 
+              ID_ALT  | 
+              ID_LOOP | 
+              ID_PAR | 
+              ID_STR
+
+channel guard: IDS.core_int.core_int.Bool
+channel alt: IDS.core_int
+channel loop: IDS.core_int
+channel par: IDS.core_int
+channel str: IDS.core_int
+
+nametype core_int = {0..5}
+
+
+Timed(OneStep) { 
+	Alt = timed_priority(((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [| diff(inter(A_Observer,union(A_Pilot,A_Handheld)),gets)|] Observer) [| {|alt,guard,terminate|} |] guards) [| union(sharedVars, {|terminate|}) |] varMemory )) \{|alt,guard|}
+
+	Pilot = WatchForAbnormalities?wAbnormalities ->
+	 (setwAbnormalities!wAbnormalities -> SKIP); decideFlightPlan?searchType ->
+	 (setSearchType!searchType -> SKIP); getSearchType?searchType -> (followFlightPlan!searchType -> SKIP); alt_Pilot_1; terminate -> SKIP
+	
+	Handheld = followFlightPlan?searchType -> 
+	 (setSearchType!searchType -> SKIP); alt_Handheld_1; terminate -> SKIP
+	
+	Observer = alt_Observer_1; terminate -> SKIP
+				
+	alt_Pilot_1 = alt.ID_ALT.1 -> SKIP; guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> guard.ID_ALT.1.3?z -> (
+				x&(AreControlsResponsive?false -> (setresponsive!false -> SKIP))	
+				[] y&(recordVideo -> SKIP) 
+				[] z&(AreControlsResponsive?true -> (setresponsive!true -> SKIP))
+				[] not(x or y or z)&(powerDrone->SKIP))
+	
+	alt_Handheld_1 = alt.ID_ALT.1 -> SKIP; guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> guard.ID_ALT.1.3?z -> (
+				x&(SKIP) 
+				[] y&(recordVideo -> SKIP) 
+				[] z&(takePicture -> SKIP)
+				[] not(x or y or z)&(powerDrone->SKIP))
+	
+	alt_Observer_1 = alt.ID_ALT.1 -> SKIP; guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> guard.ID_ALT.1.3?z -> (
+				x&(SKIP) 
+				[] y&(SKIP)
+				[] z&(takePicture -> SKIP)
+				[] not(x or y or z)&SKIP)
+	
+		
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+	
+	evaluation = reset_counters; guards_response
+	
+	counters = SKIP [] terminate -> SKIP
+	
+	reset_counters = SKIP
+	
+	
+	guards_response = alt?ID_ALT.x -> ((x==1)&((guard.ID_ALT.1.1!true -> guard.ID_ALT.1.2!false -> guard.ID_ALT.1.3!false -> SKIP)|~|(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!true -> guard.ID_ALT.1.3!false -> SKIP)|~|(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!false -> guard.ID_ALT.1.3!true -> SKIP)|~|(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!false -> guard.ID_ALT.1.3!false -> SKIP)
+				)); guards_response
+			[] terminate -> SKIP
+	
+	
+	varMemory = Memory_searchType(SearchType_AreaSearch)
+					 [| { terminate } |] (
+					 Memory_wAbnormalities(false)
+					 [| { terminate } |]
+					Memory_responsive(true))
+					-- )
+					-- )
+
+	Memory_searchType(searchType) =
+				getSearchType!searchType -> Memory_searchType(searchType)
+				[]
+				setSearchType?x__ -> Memory_searchType(x__)
+				[]
+				terminate -> SKIP
+								
+	Memory_wAbnormalities(wAbnormalities) =
+				getwAbnormalities!wAbnormalities -> Memory_wAbnormalities(wAbnormalities)
+				[] 
+				setwAbnormalities?x__ -> Memory_wAbnormalities(x__)
+				[]
+				terminate -> SKIP
+				
+					
+	Memory_responsive(responsive) =
+				getresponsive!responsive -> Memory_responsive(responsive)
+				[]
+				setresponsive?x__ -> Memory_responsive(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = union(union(union({|AreControlsResponsive, recordVideo, powerDrone, decideFlightPlan, followFlightPlan,guard.ID_ALT.1.1,guard.ID_ALT.1.2,guard.ID_ALT.1.3,alt.ID_ALT.1,terminate|},searchTypeVars),responsiveVars),wAbnormalitiesVars)
+
+A_Handheld = {|followFlightPlan,powerDrone,takePicture,recordVideo,guard.ID_ALT.1.1,guard.ID_ALT.1.2,guard.ID_ALT.1.3,alt.ID_ALT.1,terminate|}
+
+A_Observer = {|takePicture,guard.ID_ALT.1.1,guard.ID_ALT.1.2,guard.ID_ALT.1.3,alt.ID_ALT.1,terminate|}
+
+A_Counters = countVars
+countVars = {||}
+
+sharedVars = union(union(searchTypeVars,responsiveVars),wAbnormalitiesVars)
+
+wAbnormalitiesVars = {|getwAbnormalities,setwAbnormalities|}
+searchTypeVars = {|setSearchType,getSearchType|}
+responsiveVars = {|getresponsive,setresponsive|}
+
+gets = {|getSearchType,getresponsive,getwAbnormalities|}
+
+assert not Alt :[deadlock free]
+assert Alt :[divergence free]
+assert not Alt :[deterministic]
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_WoodedArea,
+setSearchType.SearchType_WoodedArea,getSearchType.SearchType_WoodedArea, followFlightPlan.SearchType_WoodedArea,setSearchType.SearchType_WoodedArea,
+AreControlsResponsive.true,setresponsive.true,
+takePicture,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_WoodedArea,
+setSearchType.SearchType_WoodedArea,getSearchType.SearchType_WoodedArea, followFlightPlan.SearchType_WoodedArea,setSearchType.SearchType_WoodedArea,
+takePicture,AreControlsResponsive.true,
+setresponsive.true,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_WoodedArea,
+setSearchType.SearchType_WoodedArea,getSearchType.SearchType_WoodedArea, followFlightPlan.SearchType_WoodedArea,setSearchType.SearchType_WoodedArea,
+recordVideo,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_WoodedArea,
+setSearchType.SearchType_WoodedArea,getSearchType.SearchType_WoodedArea, followFlightPlan.SearchType_WoodedArea,setSearchType.SearchType_WoodedArea,
+powerDrone,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_AreaSearch,
+setSearchType.SearchType_AreaSearch,getSearchType.SearchType_AreaSearch, followFlightPlan.SearchType_AreaSearch,setSearchType.SearchType_AreaSearch,
+AreControlsResponsive.false,
+setresponsive.false,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_AreaSearch,
+setSearchType.SearchType_AreaSearch,getSearchType.SearchType_AreaSearch, followFlightPlan.SearchType_AreaSearch,setSearchType.SearchType_AreaSearch,
+AreControlsResponsive.true,
+setresponsive.true,takePicture,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,getSearchType.SearchType_Linear, followFlightPlan.SearchType_Linear,setSearchType.SearchType_Linear,
+recordVideo,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_Avalanche,
+setSearchType.SearchType_Avalanche,getSearchType.SearchType_Avalanche,
+followFlightPlan.SearchType_Avalanche,setSearchType.SearchType_Avalanche,
+powerDrone,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_Avalanche,
+setSearchType.SearchType_Avalanche,getSearchType.SearchType_Avalanche,
+followFlightPlan.SearchType_Avalanche,setSearchType.SearchType_Avalanche,
+takePicture,AreControlsResponsive.true,
+setresponsive.true,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_Avalanche,
+setSearchType.SearchType_Avalanche,getSearchType.SearchType_Avalanche,
+followFlightPlan.SearchType_Avalanche,setSearchType.SearchType_Avalanche,
+AreControlsResponsive.false,setresponsive.false,terminate>
+
+assert Alt :[has trace [T]]: <WatchForAbnormalities.false, setwAbnormalities.false,decideFlightPlan.SearchType_Avalanche,
+setSearchType.SearchType_Avalanche,getSearchType.SearchType_Avalanche,
+followFlightPlan.SearchType_Avalanche,setSearchType.SearchType_Avalanche,
+recordVideo,terminate>
+
+

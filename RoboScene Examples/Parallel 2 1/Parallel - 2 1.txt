@@ -1,0 +1,27 @@
+Capabilities
+	lifeline Pilot
+		var wAbnormalities: boolean
+		in WatchForAbnormalities: boolean <- Pilot
+
+	lifeline Handheld
+		
+	lifeline Observer
+		out recordVideo -> Handheld
+		
+	Time
+		
+		
+
+
+SequenceDiagramGroup 
+	Name: Ideal Human-Interaction
+	Trait: Ideal
+	Actors: Pilot, Handheld, Observer
+	
+	Sequence LoopMinMaxOpt
+		Actors Pilot, Handheld, Observer
+		Vars flightPlan, wAbnormalities
+			par
+			    Pilot->Pilot: WatchForAbnormalities?wAbnormalities
+			    Observer->Handheld: recordVideo
+			end

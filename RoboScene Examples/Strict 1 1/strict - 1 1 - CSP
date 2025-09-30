@@ -1,0 +1,248 @@
+include "../core_timed_defs.csp"
+
+channel terminate
+	
+channel followFlightPlan: SearchType
+channel WatchForAbnormalities: Bool
+channel AreControlsResponsive: Bool
+channel takePicture
+channel recordVideo
+channel powerDrone
+
+channel setwAbnormalities: Bool
+channel getwAbnormalities: Bool
+
+channel setSearchType: SearchType
+channel getSearchType: SearchType
+
+channel setresponsive: Bool
+channel getresponsive: Bool
+
+channel setCount: IDS.core_int.core_int
+channel getCount: IDS.core_int.core_int
+
+loop_1_min_count = 1
+loop_1_max_count = 4 
+
+
+datatype SearchType = SearchType_AreaSearch | SearchType_RapidParallelLine | SearchType_Linear | SearchType_CreepingLine | SearchType_PointOfInterest | SearchType_MountainFace | SearchType_WoodedArea | SearchType_Avalanche
+				
+-- declaring identifiers of fragments
+datatype IDS = 
+              ID_ALT  | 
+              ID_LOOP | 
+              ID_PAR | 
+              ID_STR
+
+channel guard: IDS.core_int.core_int.Bool
+channel alt: IDS.core_int
+channel loop: IDS.core_int
+channel par: IDS.core_int
+channel str: IDS.core_int
+
+nametype core_int = {0..5}
+
+
+
+
+Timed(OneStep) { 
+	StrictAltLoop = timed_priority((((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [| diff(inter(union(A_Pilot, A_Handheld),A_Observer),gets) |] Observer) [| {|terminate,str|} |] Strict) [| {|loop,alt,guard,terminate|} |] guards) [| union(sharedVars, {|terminate|}) |] varMemory )) \{|loop,alt,guard,str|}
+	
+	
+	-- Lifelines
+	
+	Pilot = str.ID_STR.1 -> SKIP; 
+	 AreControlsResponsive?responsive ->
+	 (setresponsive!responsive -> SKIP); alt_Pilot_1; terminate -> SKIP
+	
+	Handheld = alt_Handheld_1; terminate -> SKIP
+	
+	Observer = alt_Observer_1; terminate -> SKIP
+	
+	
+	-- Par constructs
+	
+	Parallel = SKIP
+	
+	
+	-- Strict constructs
+	
+	Strict = str.ID_STR.1 -> strict_1; Strict
+			[]
+			terminate -> SKIP
+			
+	strict_1 = WatchForAbnormalities?wAbnormalities ->
+	 (setwAbnormalities!wAbnormalities -> SKIP)
+	
+	
+	
+	-- Alt constructs
+
+	alt_Pilot_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> (
+			x&(followFlightPlan!SearchType_RapidParallelLine -> SKIP) 
+			[] y&(followFlightPlan!SearchType_Linear -> SKIP; loop_Pilot_1)
+			[] not(x or y)&(powerDrone->SKIP))
+	 
+	alt_Observer_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y-> (
+			x&(takePicture -> SKIP) 
+			[] y&(recordVideo -> SKIP)
+			[] not(x or y)&SKIP)
+	
+	alt_Handheld_1 = alt.ID_ALT.1 -> guard.ID_ALT.1.1?x -> guard.ID_ALT.1.2?y -> (
+			x&(takePicture -> SKIP;  	
+				(followFlightPlan?searchType -> 
+				(setSearchType!searchType -> SKIP))) 
+			[] y&((followFlightPlan?searchType -> 
+				(setSearchType!searchType -> SKIP)); recordVideo -> SKIP)
+			[] not(x or y)&(powerDrone->SKIP))
+
+
+
+	-- Loop constructs
+
+
+	loop_Pilot_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
+					(x)&(AreControlsResponsive?responsive ->
+	 					setresponsive!responsive -> loop_Pilot_1) 
+					[]
+					(not(x))&(SKIP)
+					)
+	
+	
+	-- Handling of guards for loop and alt constructs
+			
+	guards = (evaluation [| union(A_Counters, {|terminate|}) |] counters) \countVars
+	
+	evaluation = reset_counters; guards_response
+	
+	counters = Counter_ID_1(0) 
+	
+	Counter_ID_1(count) = 
+				getCount.ID_LOOP.1!count -> Counter_ID_1(count)
+				[]
+				setCount.ID_LOOP.1?x__ -> Counter_ID_1(x__)
+				[]
+				terminate -> SKIP
+	
+	
+	reset_counters = setCount.ID_LOOP.1!0 -> SKIP
+	
+	
+	guards_response = alt?ID_ALT.x -> ((x==1)&(getresponsive?responsive -> getwAbnormalities?wAbnormalities -> (
+				((wAbnormalities == true) and (responsive == true))&(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!true -> SKIP)
+			[] ((wAbnormalities == false) and (responsive == true))&(guard.ID_ALT.1.1!true -> guard.ID_ALT.1.2!false -> SKIP)
+			[] not(((wAbnormalities == true) and (responsive == true)) or ((wAbnormalities == false) and (responsive == true)))&(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!false -> SKIP)))); guards_response
+			[] loop?ID_LOOP.id -> (id==1)&(getresponsive?responsive -> getCount.ID_LOOP.1?x -> (
+				not(responsive==true)&(setCount.ID_LOOP.1!0 -> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+				[] (x<loop_1_min_count and responsive==true)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
+				[] (not(x<loop_1_min_count) and not(x>=loop_1_max_count) and responsive==true)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
+				[] ((x>=loop_1_min_count and x<loop_1_max_count) and responsive==true)&((setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)))); guards_response
+			[] terminate -> SKIP
+		
+			
+	
+	varMemory = Memory_searchType(SearchType_AreaSearch)
+					 [| { terminate } |] (
+					 Memory_wAbnormalities(false)
+					 [| { terminate } |]
+					Memory_responsive(true))
+
+	Memory_searchType(searchType) =
+				getSearchType!searchType -> Memory_searchType(searchType)
+				[]
+				setSearchType?x__ -> Memory_searchType(x__)
+				[]
+				terminate -> SKIP
+								
+	Memory_wAbnormalities(wAbnormalities) =
+				getwAbnormalities!wAbnormalities -> Memory_wAbnormalities(wAbnormalities)
+				[] 
+				setwAbnormalities?x__ -> Memory_wAbnormalities(x__)
+				[]
+				terminate -> SKIP
+				
+	Memory_responsive(responsive) =
+				getresponsive!responsive -> Memory_responsive(responsive)
+				[]
+				setresponsive?x__ -> Memory_responsive(x__)
+				[]
+				terminate -> SKIP
+}
+
+A_Pilot = union(union(union({|AreControlsResponsive,powerDrone,WatchForAbnormalities, followFlightPlan,terminate,str.ID_STR.1,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1,loop.ID_LOOP.1,guard.ID_LOOP.1.1|},searchTypeVars),wAbnormalitiesVars),responsiveVars)
+
+A_Handheld = {|powerDrone,recordVideo,takePicture,followFlightPlan,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1,terminate|} 
+
+A_Observer = {|recordVideo,takePicture,terminate,guard.ID_ALT.1.1,guard.ID_ALT.1.2,alt.ID_ALT.1|}							
+
+
+A_Counters = countVars
+countVars = {|getCount,setCount|}
+
+sharedVars = union(union(searchTypeVars,wAbnormalitiesVars),responsiveVars)
+
+searchTypeVars = {|setSearchType,getSearchType|}
+wAbnormalitiesVars = {|getwAbnormalities,setwAbnormalities|}
+responsiveVars = {|getresponsive,setresponsive|}
+
+gets = {|getwAbnormalities,getSearchType,getresponsive|}
+
+assert not StrictAltLoop :[deadlock free]
+assert StrictAltLoop :[divergence free]
+assert not StrictAltLoop :[deterministic]
+assert not StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.false,followFlightPlan.SearchType_RapidParallelLine,
+setSearchType.SearchType_RapidParallelLine,terminate>
+
+assert StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.false,setresponsive.false,
+getresponsive.false,getwAbnormalities.false,powerDrone,terminate>
+
+assert not StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.false,followFlightPlan.SearchType_RapidParallelLine,
+setSearchType.SearchType_RapidParallelLine,takePicture,terminate>
+
+assert StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.false,setwAbnormalities.false,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.false,takePicture,followFlightPlan.SearchType_RapidParallelLine,
+setSearchType.SearchType_RapidParallelLine,terminate>
+
+assert StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,getresponsive.true,AreControlsResponsive.false,setresponsive.false,
+getresponsive.false,terminate>
+
+assert StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.false,setresponsive.false,
+getresponsive.false,terminate>
+
+
+assert not StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,terminate>
+
+assert StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.false,setresponsive.false,
+getresponsive.false,terminate>
+
+assert StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,terminate>
+
+assert not StrictAltLoop :[has trace [T]]: <WatchForAbnormalities.true,setwAbnormalities.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,getwAbnormalities.true,followFlightPlan.SearchType_Linear,
+setSearchType.SearchType_Linear,recordVideo,takePicture,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,AreControlsResponsive.true,setresponsive.true,
+getresponsive.true,terminate>
+
