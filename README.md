@@ -45,6 +45,7 @@ This is a collection of [examples](https://github.com/UoY-RoboStar/RoboScene/tre
 - RoboScene documents (in .txt format)
 - CSP translations, and
 - Sequence diagram images
+
 Examples are structured into folders named "fragment x y":
 - fragment: the dominant CSP fragment within the example
 - x: the number of actors or interactions involved in the fragment. If y is present, then this may correspond to the number of guards on the fragment
