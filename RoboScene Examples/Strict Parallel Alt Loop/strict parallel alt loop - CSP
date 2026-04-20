@@ -153,11 +153,10 @@ Timed(OneStep) {
 				[] ((wAbnormalities == false) and (responsive == true))&(guard.ID_ALT.1.1!true -> guard.ID_ALT.1.2!false -> SKIP)
 				[] not(((wAbnormalities == true) and (responsive == true)) or ((wAbnormalities == false) and (responsive == true)))&(guard.ID_ALT.1.1!false -> guard.ID_ALT.1.2!false -> SKIP)))); guards_response
 			[] loop?ID_LOOP.id -> ((id==1)&(getresponsive?responsive -> getCount.ID_LOOP.1?x -> (
-				not(responsive==true)&(setCount.ID_LOOP.1!0 -> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
-				[] (x<loop_1_min_count and responsive==true)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP)
-				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP)
-				--[] (not(x<loop_1_min_count) and not(x>=loop_1_max_count) and responsive==true)&(setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP) ))); guards_response
-				[] ((x>=loop_1_min_count and x<loop_1_max_count) and responsive==true)&((setCount.ID_LOOP.1!0-> SKIP; guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> SKIP; guard.ID_LOOP.1.1!true -> SKIP))))); guards_response
+				not(responsive==true)&(setCount.ID_LOOP.1!0 -> guard.ID_LOOP.1.1!false -> SKIP)
+				[] (x<loop_1_min_count and responsive==true)&(setCount.ID_LOOP.1!(x+1)->  guard.ID_LOOP.1.1!true -> SKIP)
+				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> guard.ID_LOOP.1.1!false -> SKIP)
+				[] ((x>=loop_1_min_count and x<loop_1_max_count) and responsive==true)&((setCount.ID_LOOP.1!0-> guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP))))); guards_response
 			[] terminate -> SKIP
 		
 			

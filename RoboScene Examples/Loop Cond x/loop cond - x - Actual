@@ -38,7 +38,7 @@ nametype core_int = {0..5}
 
 
 Timed(OneStep) { 
-	Loop = timed_priority(((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [|diff(inter(A_Observer,union(A_Pilot,A_Handheld)),gets) |] Observer)  [| {|loop,guard,terminate|} |] guards) [| union(sharedVars, {|terminate|}) |] varMemory ) )\{|guard,loop|}
+	Loop = timed_priority(((((Pilot [| diff(inter(A_Pilot,A_Handheld),gets) |] Handheld) [|diff(inter(A_Observer,union(A_Pilot,A_Handheld)),gets) |] Observer)  [| {|loop,guard,terminate|} |] guards) [| union(sharedVars, {|terminate|}) |] varMemory )) \{|guard,loop|}
 	
 	
 	
@@ -71,7 +71,7 @@ Timed(OneStep) {
 					[]
 					(not(x))&(SKIP)
 					)
-				
+					
 	loop_Observer_1 = loop!ID_LOOP.1 -> guard.ID_LOOP.1.1?x -> (
 					(x)&(takePicture -> loop_Observer_1)
 					[]
@@ -104,9 +104,7 @@ Timed(OneStep) {
 
 	guards_response = loop?ID_LOOP.id -> (id==1)&(getresponsive?responsive -> getCount.ID_LOOP.1?x -> (
 				not(responsive==true)&(setCount.ID_LOOP.1!0 -> guard.ID_LOOP.1.1!false -> SKIP)
-				[] (x<loop_1_min_count and responsive==true)&(setCount.ID_LOOP.1!(x+1)->  guard.ID_LOOP.1.1!true -> SKIP)
-				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0->  guard.ID_LOOP.1.1!false -> SKIP)
-				[] ((x>=loop_1_min_count and x<loop_1_max_count) and responsive==true)&((setCount.ID_LOOP.1!0-> guard.ID_LOOP.1.1!false -> SKIP) |~| (setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP)))); guards_response
+				[] (responsive==true)&(setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP))); guards_response
 		[] 
 		terminate -> SKIP
 	
@@ -152,7 +150,7 @@ gets = {|getresponsive,getSearchType|}
 
 assert not Loop :[deadlock free]
 assert Loop :[divergence free]
-assert not Loop :[deterministic]
+assert Loop :[deterministic]
 assert Loop :[has trace [T]]: <AreControlsResponsive.false,setresponsive.false,getresponsive.false,terminate>
 
 assert not Loop :[has trace [T]]: <AreControlsResponsive.true,setresponsive.true,

@@ -104,9 +104,7 @@ Timed(OneStep) {
 
 
 	guards_response = loop?ID_LOOP.id -> (id==1)&(getCount.ID_LOOP.1?x -> (
-				(x<loop_1_min_count)&(setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP)
-				[] (x==loop_1_max_count)&(setCount.ID_LOOP.1!0-> guard.ID_LOOP.1.1!false -> SKIP)
-				[] ((x>=loop_1_min_count and x<loop_1_max_count))&((setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP)))); guards_response
+				setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP)); guards_response
 		[] 
 		terminate -> SKIP
 	

@@ -88,8 +88,7 @@ Timed(OneStep) {
 
 	guards_response = loop?ID_LOOP.id -> (id==1)&(getresponsive?responsive -> getCount.ID_LOOP.1?x -> (
 				not(responsive==true)&(setCount.ID_LOOP.1!0 -> guard.ID_LOOP.1.1!false -> SKIP)
-				[] (x==default_max)&(setCount.ID_LOOP.1!0-> guard.ID_LOOP.1.1!false -> SKIP)
-				[] ((x<default_max) and responsive)&(setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP)
+				[] (responsive)&(setCount.ID_LOOP.1!(x+1)-> guard.ID_LOOP.1.1!true -> SKIP)
 				)); guards_response
 		[] 
 		terminate -> SKIP
