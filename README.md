@@ -5,7 +5,7 @@ Click on the links below, or navigate through the folders, to find materials for
 ## Running Example (Small SAR Example)
 The folder of [all running example documents](https://github.com/UoY-RoboStar/RoboScene/tree/main/Running%20Example) contains:
 - [RoboScene Document](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/BatteryCheck%20RoboScene%20Model)
-- [Sequence Diagram Image](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/BatteryCheck%20RoboScene%20SequenceDiagram.jpeg)
+- [Sequence Diagram Image](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/BatteryCheck%20RoboScene%20SequenceDiagram.png)
 - [RoboChart of Drone](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/drone.rct)
 - [RoboChart of Drone Image](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/RoboChart%20Model%20of%20Drone.jpg)
 - [RoboChart of Handheld](https://github.com/UoY-RoboStar/RoboScene/blob/main/Running%20Example/handheld.rct)
@@ -19,9 +19,9 @@ The folder of [all SAR example documents](https://github.com/UoY-RoboStar/RoboSc
 - Image of the final RoboChart model for the Drone
 - Image of the final RoboChart model for the Handheld
 - RoboScene sequence diagrams for the AreaSearch scenario with trained users and traits of:
-  - [Ideal Operator and Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_SD.jpg)
-  - [A Fatigued Operator and Ideal Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_-_Fatigued_SD.jpg)
-  - [An Operator Under Pressure and an Ideal Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_-_Under_Pressure_SD.jpg)
+  - [Ideal Operator and Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_SD.png)
+  - [A Fatigued Operator and Ideal Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_-_Fatigued_SD.png)
+  - [An Operator Under Pressure and an Ideal Pilot](https://github.com/UoY-RoboStar/RoboScene/blob/main/SAR%20Example/AreaSearch_-_Under_Pressure_SD.png)
 - The RoboScene model, csp files, sequence diagrams and RoboChart models for each step of the development process:
   - [Step 1](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%201)
   - [Step 2](https://github.com/UoY-RoboStar/RoboScene/tree/main/SAR%20Example/Step%202)
