@@ -1,0 +1,466 @@
+diagram handheld
+
+interface PilotDisplayInput {
+	event FollowFlightPlan
+	event InputFlightPlan : SearchType
+	event InputAreaCoordinates : AreaCoords
+	event InputHomeCoordinate : Coord
+	event InputCoordinate : Coord
+	event ManualMovement : Direction
+	event StopSearch
+	event ReturnToHome
+}
+
+interface BatteryInput {
+	event GetDroneBatteryStatus
+}
+
+
+interface PilotDisplayOutput {
+	DisplayDroneBatteryStatus ( status:Status )
+}
+
+interface SearchVars {
+	var FlightPlan : SearchType
+}
+
+interface SystemUI {
+	event PowerDrone
+	event PowerHandheld
+}
+
+interface SystemOperation {
+	powerDroneAutomatically()
+}
+
+interface HandheldOperation {
+	stopHandheldOperating(forceQuit:boolean,dronePowerTime:nat)
+}
+
+interface systemPower {
+	var systemDroneOn: boolean
+	var systemHandheld: SystemPower
+}
+
+interface DroneSearch {
+	FollowPlan ( searchType : SearchType )
+	FlyToCoordinate ( coord : Coord )
+	MoveDrone ( direction : Direction )
+	FlyToAreaCoordinates ( coords : AreaCoords )
+	DroneStopSearch()
+}
+
+interface DroneSystemControl {
+	OnOffDrone()
+}
+
+interface DroneInput{
+	GetBatteryStatus()
+}
+
+interface DroneOutput {
+	event DisplayStatus: Status
+}
+
+enumeration SystemPower {
+	On
+	Off
+}
+
+robotic platform Handheld_Platform {
+	provides PilotDisplayOutput 
+	provides systemPower
+	provides SearchVars
+	provides SystemOperation
+	uses DroneOutput
+	uses BatteryInput
+	uses PilotDisplayInput
+	uses SystemUI
+	provides DroneSystemControl
+	provides DroneSearch
+	provides DroneInput
+	provides HandheldOperation
+}
+
+controller PilotDisplayController {
+	uses PilotDisplayInput 
+	requires DroneSearch
+	requires DroneSystemControl
+	requires HandheldOperation
+	requires systemPower
+	requires SearchVars
+	
+	sref stm_ref0 = PilotDisplayStm
+	
+	connection PilotDisplayController on FollowFlightPlan to stm_ref0 on FollowFlightPlan
+	connection PilotDisplayController on InputFlightPlan to stm_ref0 on InputFlightPlan
+	connection PilotDisplayController on InputAreaCoordinates to stm_ref0 on InputAreaCoordinates
+	connection PilotDisplayController on InputCoordinate to stm_ref0 on InputCoordinate
+	connection PilotDisplayController on ManualMovement to stm_ref0 on ManualMovement
+	connection PilotDisplayController on StopSearch to stm_ref0 on StopSearch
+	connection PilotDisplayController on ReturnToHome to stm_ref0 on ReturnToHome
+	connection PilotDisplayController on InputHomeCoordinate to stm_ref0 on InputHomeCoordinate
+}
+
+controller BatteryController {
+	uses BatteryInput
+	requires PilotDisplayOutput 
+	requires DroneInput
+	requires systemPower
+	uses DroneOutput
+	
+	sref stm_ref0 = BatteryStatusStm
+	
+	connection BatteryController on GetDroneBatteryStatus to stm_ref0 on GetDroneBatteryStatus
+	connection BatteryController on DisplayStatus to stm_ref0 on DisplayStatus
+}
+
+
+controller SystemController {
+	requires SystemOperation
+	requires systemPower
+	requires DroneSystemControl
+	uses SystemUI 
+	
+	opref sh = stopHandheldOperating
+	sref stm_ref0 = SystemSW
+	
+	connection SystemController on PowerHandheld to stm_ref0 on PowerHandheld
+	connection SystemController on PowerDrone to stm_ref0 on PowerDrone
+}
+
+stm SystemSW {
+	uses SystemUI 
+	requires HandheldOperation
+	requires SystemOperation
+	requires systemPower
+	requires DroneSystemControl
+	
+	const startTime : nat
+	const dronePowerTime : nat
+	var forceQuit : boolean = false
+	
+	initial i0
+	final f0
+				
+	state Off {
+		entry wait(startTime); systemHandheld=SystemPower::Off
+	}	
+	
+	state HandheldOperating {
+		entry wait(startTime); systemDroneOn=false
+		exit systemDroneOn=false; systemHandheld=SystemPower::Off; stopHandheldOperating(forceQuit, dronePowerTime)
+		
+		initial i0
+		
+		state DisplayDroneControls {
+		}
+		state DroneOperating {
+			entry systemDroneOn=true
+			exit systemDroneOn=false
+		}
+		
+		transition t0 {
+			from i0
+			to DisplayDroneControls
+		}
+		transition t1 {
+			from DisplayDroneControls
+			to DroneOperating
+			trigger PowerDrone<{2}
+			action OnOffDrone(); wait(dronePowerTime); forceQuit=true
+		}
+		transition t2 {
+			from DroneOperating
+			to DisplayDroneControls
+			trigger PowerDrone
+			action OnOffDrone(); forceQuit=false; wait(dronePowerTime) 
+		}
+	}
+	
+	transition t0 {
+		from i0
+		to Off
+	}
+	transition t1 {
+		from Off
+		to HandheldOperating
+		trigger PowerHandheld
+		action systemHandheld=SystemPower::On
+	}
+	transition t2 {
+		from HandheldOperating
+		to f0
+		trigger PowerHandheld
+		action systemHandheld=SystemPower::Off
+	}
+}
+
+stm PilotDisplayStm {
+	uses PilotDisplayInput 
+	requires DroneSearch
+	requires systemPower
+	requires SearchVars
+	
+	var aFlightPlan : SearchType
+	var aAreaSearchPoints: AreaCoords
+	var aHomeCoord: Coord
+	var aWayPoint: Coord
+	var adirection : Direction
+	var flightPlanFinished : boolean
+	const hToDCommTime : nat
+
+	initial i0
+	final f0
+	
+	state WaitForInput {
+	}
+	
+	state ExecuteFlightPlan{			
+		initial i0
+		entry flightPlanFinished = false
+		
+		state WaitForInput {
+		} 
+		
+		state f0 {
+			entry flightPlanFinished = true
+		}
+		
+		transition t0 {
+			from s0
+			to WaitForInput
+			condition systemDroneOn/\systemHandheld==SystemPower::On
+		}
+		
+		transition t1 {
+			from WaitForInput
+			to WaitForInput
+			trigger InputAreaCoordinates?aAreaSearchPoints<{15}
+			condition aFlightPlan==SearchType::AreaSearch
+			action FlyToAreaCoordinates(aAreaSearchPoints)
+		}
+		
+		transition t2 {
+			from WaitForInput
+			to WaitForInput
+			trigger InputCoordinate?aWayPoint
+			condition not aFlightPlan==SearchType::AreaSearch
+			action FlyToCoordinate(aWayPoint); wait(hToDCommTime)
+		}
+		
+		transition t3{
+			from WaitForInput
+			to f0
+			trigger StopSearch
+			action DroneStopSearch(); wait(hToDCommTime)
+		}
+		
+		transition t4{
+			from WaitForInput
+			to f0
+			condition not systemDroneOn\/systemHandheld==SystemPower::Off
+		}
+		
+		state s0 {
+		}
+		
+		transition t5 {
+			from i0
+			to s0
+		}
+	}
+	
+	transition t0 {
+		from s0
+		to WaitForInput
+		condition systemHandheld == SystemPower :: On
+	}
+	
+	transition t1 {
+		from WaitForInput
+		to WaitForInput
+		trigger InputFlightPlan?aFlightPlan<{6}
+		condition systemDroneOn
+		action FlightPlan=aFlightPlan
+	}
+	
+	transition t4 {
+		from WaitForInput
+		to WaitForInput
+		trigger InputHomeCoordinate?aHomeCoord
+		condition systemDroneOn
+	}
+	
+	transition t8 {
+		from WaitForInput
+		to WaitForInput
+		trigger ReturnToHome
+		condition systemDroneOn
+		action FlyToCoordinate(aHomeCoord); wait(hToDCommTime)
+	}
+	
+	transition t2 {
+		from WaitForInput
+		to ExecuteFlightPlan
+		trigger FollowFlightPlan
+		condition systemDroneOn
+		action FollowPlan(aFlightPlan)
+	}
+	
+	transition t3 {
+		from WaitForInput
+		to WaitForInput
+		trigger ManualMovement?adirection
+		condition systemDroneOn
+		action MoveDrone(adirection); wait(hToDCommTime)
+	}
+	
+	transition t5 {
+		from ExecuteFlightPlan
+		to WaitForInput
+		condition systemDroneOn/\flightPlanFinished
+	}
+	
+	
+	
+	transition t7 {
+		from ExecuteFlightPlan
+		to f0
+		condition systemHandheld==SystemPower::Off
+	}
+	
+	transition t6 {
+		from WaitForInput
+		to f0
+		condition systemHandheld==SystemPower::Off
+	}
+	
+	transition t12 {
+		from ExecuteFlightPlan
+		to WaitForInput
+		condition not systemDroneOn
+	}
+	state s0 {
+		entry systemHandheld=SystemPower::Off; systemDroneOn=false
+	}
+	transition t14 {
+		from i0
+		to s0
+	}
+}
+
+stm BatteryStatusStm{
+	uses BatteryInput
+	requires PilotDisplayOutput 
+	requires systemPower
+	requires DroneInput
+	uses DroneOutput
+	
+	var aStatus: Status
+	
+	const hToDCommTime : nat
+	const batteryCallWaitTime : nat
+
+	initial i0
+	final f0
+	
+	state WaitForInput {
+	}
+	
+	state s0 {
+		entry systemHandheld=SystemPower::Off; systemDroneOn=false
+	}
+	transition t14 {
+	 	from i0
+		to s0
+	}
+	
+	transition t0 {
+		from s0
+		to WaitForInput
+		condition systemHandheld==SystemPower::On/\systemDroneOn
+	}
+	transition t6 {
+		from WaitForInput
+		to f0
+		condition systemHandheld==SystemPower::Off
+	}
+
+	transition t10 {
+		from WaitForBatteryStatus
+		to WaitForInput
+		trigger DisplayStatus?aStatus<{2}
+		condition systemDroneOn
+		action DisplayDroneBatteryStatus(aStatus)
+	}
+	transition t11 {
+		from WaitForBatteryStatus
+		to f0
+		condition systemHandheld == SystemPower :: Off
+	}
+	transition t9 {
+		from WaitForInput
+		to WaitForBatteryStatus
+		trigger GetDroneBatteryStatus
+		condition systemDroneOn
+		action GetBatteryStatus(); wait(hToDCommTime)
+	}
+	
+	transition t13 {
+		from WaitForBatteryStatus
+		to WaitForInput
+		condition not systemDroneOn
+	}
+	
+	state WaitForBatteryStatus {
+	}
+}
+
+
+operation stopHandheldOperating(forceQuit:boolean,dronePowerTime:nat) {
+	uses SystemUI 
+	requires SystemOperation
+	
+	initial i0
+	final f0
+	junction j0
+	
+	transition t0 {
+		from i0
+		to j0
+	}
+	transition t1 {
+		from j0
+		to f0
+		condition forceQuit==false
+	}	
+	transition t2 {
+		from j0
+		to f0
+		condition forceQuit==true
+		action powerDroneAutomatically(); wait(dronePowerTime)
+	}
+}
+
+module SAR_Handheld {
+	rref rp_ref0 = Handheld_Platform
+	cref ctrl_ref0 = PilotDisplayController
+	cref ctrl_ref2 = SystemController
+	cref ctrl_ref3 = BatteryController
+	
+	
+	connection rp_ref0 on PowerDrone to ctrl_ref2 on PowerDrone ( _async )
+	connection rp_ref0 on PowerHandheld to ctrl_ref2 on PowerHandheld ( _async )	
+	connection rp_ref0 on InputAreaCoordinates to ctrl_ref0 on InputAreaCoordinates ( _async )
+	connection rp_ref0 on FollowFlightPlan to ctrl_ref0 on FollowFlightPlan ( _async )
+	connection rp_ref0 on InputCoordinate to ctrl_ref0 on InputCoordinate ( _async )
+	connection rp_ref0 on ManualMovement to ctrl_ref0 on ManualMovement ( _async )
+	connection rp_ref0 on InputFlightPlan to ctrl_ref0 on InputFlightPlan ( _async )
+	connection rp_ref0 on StopSearch to ctrl_ref0 on StopSearch ( _async )
+	connection rp_ref0 on ReturnToHome to ctrl_ref0 on ReturnToHome ( _async )
+	connection rp_ref0 on InputHomeCoordinate to ctrl_ref0 on InputHomeCoordinate ( _async )
+	connection rp_ref0 on GetDroneBatteryStatus to ctrl_ref3 on GetDroneBatteryStatus ( _async )
+	connection rp_ref0 on DisplayStatus to ctrl_ref3 on DisplayStatus ( _async )
+}
+

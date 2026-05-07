@@ -1,0 +1,298 @@
+interface Search {
+	event FollowPlan : SearchType
+	event MoveDrone : Direction
+	event FlyToCoordinate : Coord
+	event FlyToAreaCoordinates : AreaCoords
+	event DroneStopSearch
+}
+
+interface Movement {
+	movement ( coord : Coord )
+	directionMovement ( direction : Direction )
+	initSearch ( searchType : SearchType )
+}
+
+interface HandheldInput {
+	event GetBatteryStatus
+}
+
+interface HandheldOutput {
+	DisplayStatus (status:Status)
+}
+
+interface dronePower {
+	var droneOn : boolean
+}
+
+interface SystemControl {
+	event OnOffDrone
+}
+
+robotic platform SAR_Platform {
+	uses Search 
+	uses HandheldInput 
+	uses SystemControl 
+	provides dronePower 
+	provides HandheldOutput 
+	provides Movement 
+}
+
+enumeration Power { On Off } 
+enumeration Status { High Low } 
+record Coord { lat : real lon : real alt : real heading : real } 
+enumeration Direction { Up Down Left Right Forward Backward } 
+enumeration SearchType { AreaSearch RapidParallelLine Linear CreepingLine PointOfInterest MountainFace WoodedArea Avalanche } 
+record AreaCoords { Corner1 : Coord Corner2 : Coord Corner3 : Coord Corner4 : Coord } 
+
+controller MovementController {
+	uses Search requires Movement requires dronePower sref stm_ref0 = MovementStm
+	connection MovementController on FlyToCoordinate to stm_ref0 on FlyToCoordinate
+	connection MovementController on MoveDrone to stm_ref0 on MoveDrone
+	connection MovementController on FollowPlan to stm_ref0 on FollowPlan
+	connection MovementController on FlyToAreaCoordinates to stm_ref0 on FlyToAreaCoordinates
+	connection MovementController on DroneStopSearch to stm_ref0 on DroneStopSearch
+}
+
+controller HandheldController {
+	uses HandheldInput requires HandheldOutput requires dronePower sref stm_ref0 = HandheldStm
+	connection HandheldController on GetBatteryStatus to stm_ref0 on GetBatteryStatus
+}
+
+controller PowerController {
+	uses SystemControl requires dronePower sref stm_ref0 = PowerStm
+	connection PowerController on OnOffDrone to stm_ref0 on OnOffDrone
+}
+
+stm HandheldStm {
+	uses HandheldInput requires HandheldOutput requires dronePower 
+	const hToDCommTime : nat
+	
+	initial i0
+	final f0
+	state WaitForUserInput {
+	}
+	transition t0 {
+		from s0
+		to WaitForUserInput
+		condition droneOn
+	}
+	transition t1 {
+		from WaitForUserInput
+		to f0
+		condition not droneOn
+	}
+	transition t2 {
+		from WaitForUserInput
+		to WaitForUserInput
+		trigger GetBatteryStatus
+		condition droneOn
+		action wait(hToDCommTime); DisplayStatus (Status::High)
+	}
+	state s0 {
+		entry droneOn=false
+	}
+	transition t3 {
+		from i0
+		to s0
+	}
+}
+
+stm PowerStm {
+	uses SystemControl requires dronePower const startTime : nat
+	const dronePowerTime : nat
+	var forceQuit : boolean = false
+	initial i0
+	final f0
+	state Off {
+		entry wait ( startTime ) ; droneOn = false
+	}
+	state DroneOperating {
+		exit droneOn = false
+	}
+	transition t1 {
+		from Off
+		to DroneOperating
+		trigger OnOffDrone
+		action wait ( dronePowerTime ) ; droneOn = true
+	}
+	transition t2 {
+		from DroneOperating
+		to f0
+		trigger OnOffDrone
+	}
+	transition t3 {
+		from i0
+		to Off
+	}
+}
+
+stm MovementStm {
+	uses Search requires Movement requires dronePower var aflyToWayPoint : Coord
+	var aflyToAreaWayPoints : AreaCoords
+	var adirectionalMovement : Direction
+	var asearchType : SearchType
+	var searchComplete : boolean
+	const movementTime : nat
+	initial i0
+	final f0
+	transition tStart {
+		from s0
+		to WaitForUserInput
+		condition droneOn
+	}
+	state s0 {
+		entry droneOn=false
+	}
+	state WaitForUserInput {		
+	}
+	state InitiateSearch {
+		initial i0
+		state WaitForUserInput {
+			entry searchComplete=false
+		}
+		state AreaSearch {
+			initial i0
+			state s0 {}
+			state s1 {}
+			state s2 {}
+			state s3 {}
+			state s4 {}
+			final f0
+			transition t0 {
+				from i0
+				to s0
+			}
+			transition t1 {
+				from s0
+				to s1
+				condition droneOn
+				action movement ( aflyToAreaWayPoints . Corner1 ) ; wait ( movementTime )
+			}
+			transition t2 {
+				from s1
+				to s2
+				condition droneOn
+				action movement ( aflyToAreaWayPoints . Corner2 ) ; wait ( movementTime )
+			}
+			transition t3 {
+				from s2
+				to s3
+				condition droneOn
+				action movement ( aflyToAreaWayPoints . Corner3 ) ; wait ( movementTime )
+			}
+			transition t4 {
+				from s3
+				to s4
+				condition droneOn
+				action movement ( aflyToAreaWayPoints . Corner4 ) ; wait ( movementTime )
+			}
+			transition t5 {
+				from s4
+				to f0
+				condition droneOn
+				action movement ( aflyToAreaWayPoints . Corner1 ) ; wait ( movementTime ); searchComplete = true
+			}
+		}
+		state Move {
+			entry movement ( aflyToWayPoint ) ; wait ( movementTime )
+		}
+		transition t0 {
+			from s0
+			to WaitForUserInput
+			condition droneOn
+		}
+		transition t1 {
+			from WaitForUserInput
+			to AreaSearch
+			trigger FlyToAreaCoordinates ? aflyToAreaWayPoints
+			condition droneOn /\ asearchType == AreaSearch
+		}
+		transition t2 {
+			from AreaSearch
+			to WaitForUserInput
+			condition searchComplete==true
+		}
+		transition t5 {
+			from Move
+			to WaitForUserInput
+		}
+		transition t6 {
+			from WaitForUserInput
+			to Move
+			trigger FlyToCoordinate ? aflyToWayPoint
+			condition droneOn
+		}
+		state s0 {
+		}
+		transition t4 {
+			from i0
+			to s0
+		}
+	}
+	state Move {
+		entry movement ( aflyToWayPoint ) ; wait ( movementTime )
+	}
+	transition t5 {
+		from Move
+		to WaitForUserInput
+	}
+	transition t6 {
+		from WaitForUserInput
+		to Move
+		trigger FlyToCoordinate ? aflyToWayPoint
+		condition droneOn
+	}
+	state DirectionalMovement {
+		entry directionMovement ( adirectionalMovement ) ; wait ( movementTime )
+	}
+	transition t0 {
+		from i0
+		to s0
+	}
+	transition t1 {
+		from WaitForUserInput
+		to InitiateSearch
+		trigger FollowPlan ? asearchType
+		condition droneOn
+	}
+	transition t3 {
+		from WaitForUserInput
+		to DirectionalMovement
+		trigger MoveDrone ? adirectionalMovement
+		condition droneOn
+	}
+	transition t4 {
+		from DirectionalMovement
+		to WaitForUserInput
+	}
+	transition t7 {
+		from InitiateSearch
+		to WaitForUserInput
+		trigger DroneStopSearch
+	}
+	transition t8 {
+		from WaitForUserInput
+		to f0
+		condition not droneOn
+	}
+	transition t9 {
+		from InitiateSearch
+		to f0
+		condition not droneOn
+	}
+}
+
+module SAR_SW {
+	connection rp_ref0 on MoveDrone to ctrl_ref0 on MoveDrone ( _async )
+	connection rp_ref0 on FollowPlan to ctrl_ref0 on FollowPlan ( _async )
+	connection rp_ref0 on FlyToCoordinate to ctrl_ref0 on FlyToCoordinate ( _async )
+	connection rp_ref0 on FlyToAreaCoordinates to ctrl_ref0 on FlyToAreaCoordinates ( _async )
+	connection rp_ref0 on GetBatteryStatus to ctrl_ref3 on GetBatteryStatus ( _async )
+	connection rp_ref0 on OnOffDrone to ctrl_ref4 on OnOffDrone ( _async )
+	rref rp_ref0 = SAR_Platform
+	cref ctrl_ref0 = MovementController
+	cref ctrl_ref3 = HandheldController
+	cref ctrl_ref4 = PowerController
+connection rp_ref0 on DroneStopSearch to ctrl_ref0 on DroneStopSearch ( _async )
+}
+
