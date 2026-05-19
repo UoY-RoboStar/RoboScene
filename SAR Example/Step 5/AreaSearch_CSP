@@ -785,7 +785,7 @@ Timed(OneStep) {
 			sethomeCoord!(0,0,0,0) ->  
 			FollowFlightPlan ->
 			ADeadline(
-				ALL,{|DroneStopSearch|},s(185)
+				ALL,{|DroneStopSearch|},s(170)
 			); 
 			getfound?true ->
 			ReturnToHome ->
@@ -822,7 +822,7 @@ Timed(OneStep) {
 			setflightPlan!SearchType_AreaSearch ->
 			PowerHandheld ->
 			ADeadline(
-				ALL,{|PowerHandheld|},s(200)
+				ALL,{|PowerHandheld|},s(230)
 			);
 			terminate -> SKIP
 		)

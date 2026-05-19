@@ -822,7 +822,7 @@ Timed(OneStep) {
 			setflightPlan!SearchType_AreaSearch ->
 			PowerHandheld ->
 			ADeadline(
-				ALL,{|PowerHandheld|},s(200)
+				ALL,{|PowerHandheld|},s(230)
 			);
 			terminate -> SKIP
 		)
